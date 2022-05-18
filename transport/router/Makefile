@@ -4,11 +4,13 @@
 #
 # Makefile for the srvc_router
 #
-
+XCC_PATH = ../../nodes/ukamaOS/distro/tools/musl-cross-make/output
+VERSION := $(shell git rev-list --abbrev-commit --tags --max-count=1)
 # some generic defs.
 CC   = gcc
 ARCH = X86_64
-XGCC = home/vishal/cdrive/work/git/ukama/ukama/nodes/ukamaOS/distro/tools/musl-cross-make/output/bin/x86_64-linux-musl-gcc
+XGCC = $(XCC_PATH)/bin/x86_64-linux-musl-gcc
+CC = $(XGCC)
 XLD  = ld
 XGXX = g++
 HOST = $(shell gcc -dumpmachine)
@@ -62,27 +64,35 @@ LIBS+=-luuid
 
 LDFLAGS+=-L$(VENDOR_LIB)/build/lib
 LDFLAGS+=-L$(VENDOR_LIB)/build/lib64
+
 #LDFLAGS+=-L/opt/lib/lib
 
 # Soruce files
 CFILES   = $(wildcard ./src/*.c)
 OBJFILES = $(CFILES:.c=.o)
 
-.PHONY: $(TARGET_EXEC)
+.PHONY: $(TARGET_EXEC) container
 
 srvc_router: $(TARGET_EXEC)
 
 $(TARGET_EXEC): $(OBJFILES)
 	rm -rf $(BUILD); mkdir $(BUILD)
 	$(CC) -o $(BUILD)/$(TARGET_EXEC) $(OBJFILES) $(COMM_OBJFILES) $(LDFLAGS) $(LIBS)
-	cp -rf $(VENDOR_LIB)/build/lib $(VENDOR_LIB)/build/lib64 $(BUILD)
-	cp -rf /lib/x86_64-linux-gnu/libc.so $(BUILD)/lib
-	cp -rf /home/vishal/cdrive/work/git/olsukamaOS/distro/tools/musl-cross-make/build/local/x86_64-linux-musl/obj_gcc/x86_64-linux-musl/libatomic/.libs/libatomic.so* $(BUILD)/lib
-	echo "Done."
+	echo "Build Done."
+
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 all: srvc_router
+
+container: $(TARGET_EXEC)
+	@echo Getting required libs
+	cp -rf $(VENDOR_LIB)/build/lib $(VENDOR_LIB)/build/lib64 $(BUILD)
+	cp -rf $(XCC_PATH)/x86_64-linux-musl/lib/libc.so $(BUILD)/lib
+	cp -rf $(XCC_PATH)/x86_64-linux-musl/lib/libatomic.so* $(BUILD)/lib
+	@echo Building container
+	sudo buildah bud -f . -t ukamaos/service_router:${VERSION}
+
 
 clean:
 	rm -f $(TARGET_EXEC) $(OBJFILES)
