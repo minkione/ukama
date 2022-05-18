@@ -105,10 +105,10 @@ int main (int argc, char **argv) {
     fprintf(stderr, "Error allocating memory of: %lu", sizeof(Config));
     exit(1);
   }
-  
+
   /* Prase command line args. */
   while (TRUE) {
-    
+
     opt    = 0;
     opdidx = 0;
 
@@ -130,7 +130,7 @@ int main (int argc, char **argv) {
     case 'H':
       config->hostName = optarg;
       break;
-      
+
     case 'p':
       config->port = optarg;
       break;
@@ -166,15 +166,17 @@ int main (int argc, char **argv) {
     exit(0);
   }
 
-  getchar(); /* For now. XXX */
+  while(1) {
+      sleep(10);
+  }
 
   log_debug("Bye World!\n");
-  
+
   ulfius_stop_framework(&webInst);
   ulfius_clean_instance(&webInst);
   curl_global_cleanup();
 
   free_router(router);
-  
+
   return 1;
 }
