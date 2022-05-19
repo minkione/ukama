@@ -38,19 +38,19 @@ func NewConfig() *Config {
 					"ping": ServiceName, "path": "/ping",
 				},
 				{
-					"node": "*", "looking_for": "info", "path": "/node/",
+					"node": "*", "looking_for": "info", "path": "/node",
 				},
 				{
-					"node": "*", "looking_to": "update", "path": "/node/",
+					"node": "*", "looking_to": "update", "path": "/node",
 				},
 				{
-					"node": "*", "looking_to": "delete", "path": "/node/",
+					"node": "*", "looking_to": "delete", "path": "/node",
 				},
 				{
 					"node": "*", "looking_for": "status_info", "path": "/node/status",
 				},
 				{
-					"node": "*", "looking_to": "status_update", "status": "StatusNodeIntransit", "path": "/node/status",
+					"node": "*", "looking_to": "status_update", "status": "*", "path": "/node/status",
 				},
 				{
 					"node": "*", "looking_for": "mfg_status_info", "path": "/node/mfg_status",
@@ -62,16 +62,16 @@ func NewConfig() *Config {
 					"node": "*", "looking_for": "list", "path": "/node/all",
 				},
 				{
-					"module": "*", "looking_for": "info", "path": "/module/",
+					"module": "*", "looking_for": "info", "path": "/module",
 				},
 				{
-					"module": "*", "looking_to": "update", "path": "/module/",
+					"module": "*", "looking_to": "update", "path": "/module",
 				},
 				{
-					"module": "*", "looking_to": "delete", "path": "/module/",
+					"module": "*", "looking_to": "delete", "path": "/module",
 				},
 				{
-					"module": "*", "looking_to": "allocate", "node":"*", "path": "/module/",
+					"module": "*", "looking_to": "allocate", "node": "*", "path": "/module/assign",
 				},
 				{
 					"module": "*", "looking_for": "status_info", "status": "*", "path": "/module/status",
