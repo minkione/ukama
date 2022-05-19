@@ -71,7 +71,7 @@ func NewConfig() *Config {
 					"module": "*", "looking_to": "delete", "path": "/module/",
 				},
 				{
-					"module": "*", "looking_to": "allocate", "path": "/module/",
+					"module": "*", "looking_to": "allocate", "node":"*", "path": "/module/",
 				},
 				{
 					"module": "*", "looking_for": "status_info", "status": "*", "path": "/module/status",
