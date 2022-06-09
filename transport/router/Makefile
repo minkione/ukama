@@ -5,7 +5,7 @@
 # Makefile for the srvc_router
 #
 XCC_PATH = ../../nodes/ukamaOS/distro/tools/musl-cross-make/output
-VERSION := $(shell git rev-list --abbrev-commit --tags --max-count=1)
+VERSION := $(shell git rev-parse --short HEAD)
 # some generic defs.
 CC   = gcc
 ARCH = X86_64
