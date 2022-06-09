@@ -137,6 +137,7 @@ int valid_forward_route(char *host, int port) {
   if (curl) {
 
     sprintf(url, "http://%s:%d/ping", host, port);
+    log_info("Connecting %s.", url);
     curl_easy_setopt(curl, CURLOPT_URL, url);
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT, 2L); /* 2 second timeout */
@@ -146,7 +147,15 @@ int valid_forward_route(char *host, int port) {
     curl_easy_cleanup(curl);
 
     if (response != CURLE_OK) {
-      return UKAMA_ERROR_BAD_DEST;
+       sleep(2);
+       log_error("retrying...");
+       response = curl_easy_perform(curl);
+       if (response != CURLE_OK) {
+           return UKAMA_ERROR_BAD_DEST;
+       } else {
+           return TRUE;
+       }
+
     } else {
       return TRUE;
     }

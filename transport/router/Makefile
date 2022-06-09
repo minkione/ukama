@@ -21,7 +21,7 @@ TARGET_EXEC = srvc_router
 
 BUILD = ./build
 
-VENDOR_LIB=../../nodes/ukamaOS/distro/vendor
+VENDOR_LIB=/opt/musl_vendor
 
 # Setting up various compile and link flags
 CFLAGS+=-c
@@ -29,7 +29,7 @@ CFLAGS+=-g
 CFLAGS+=-Wall
 CFLAGS+=-O0 -fPIE
 CFLAGS+=-I./inc
-CFLAGS+=-I$(VENDOR_LIB)/build/include
+CFLAGS+=-I$(VENDOR_LIB)/include
 CFLAGS+=-D_REENTRANT
 
 # Libs
@@ -62,8 +62,8 @@ LIBS+=$(CURL_LIB_DEP)
 
 LIBS+=-luuid
 
-LDFLAGS+=-L$(VENDOR_LIB)/build/lib
-LDFLAGS+=-L$(VENDOR_LIB)/build/lib64
+LDFLAGS+=-L$(VENDOR_LIB)/lib
+LDFLAGS+=-L$(VENDOR_LIB)/lib64
 
 #LDFLAGS+=-L/opt/lib/lib
 
@@ -87,7 +87,7 @@ all: srvc_router
 
 container: $(TARGET_EXEC)
 	@echo Getting required libs
-	cp -rf $(VENDOR_LIB)/build/lib $(VENDOR_LIB)/build/lib64 $(BUILD)
+	cp -rf $(VENDOR_LIB)/lib $(VENDOR_LIB)/lib64 $(BUILD)
 	cp -rf $(XCC_PATH)/x86_64-linux-musl/lib/libc.so $(BUILD)/lib
 	cp -rf $(XCC_PATH)/x86_64-linux-musl/lib/libatomic.so* $(BUILD)/lib
 	@echo Building container
