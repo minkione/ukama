@@ -3,7 +3,7 @@ on:
   push:   
     paths:
         #- "transport/mesh/**"
-        - ".github/workflows/services-network-mesh.yaml"
+        - ".github/workflows/**"
     tags:
         - "*"
   workflow_dispatch:
