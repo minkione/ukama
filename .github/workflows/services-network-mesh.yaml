@@ -2,7 +2,7 @@ name: services-network-mesh
 on:
   push:   
     paths:
-        - "transport/mesh/**"
+        #- "transport/mesh/**"
         - ".github/workflows/services-network-mesh.yaml"
     tags:
         - "*"
