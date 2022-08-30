@@ -61,6 +61,20 @@ const initializeApp = async () => {
             const playgroundRenderPageOptions: MiddlewareOptions = {
                 endpoint: "/graphql",
                 subscriptionEndpoint: "/graphql",
+                settings: {
+                    "editor.fontSize": 12,
+                    "editor.theme": "dark",
+                    "editor.reuseHeaders": true,
+                    "general.betaUpdates": false,
+                    "schema.polling.enable": true,
+                    "editor.cursorShape": "line",
+                    "schema.polling.interval": 2000,
+                    "request.credentials": "include",
+                    "tracing.hideTracingResponse": true,
+                    "queryPlan.hideQueryPlanResponse": true,
+                    "editor.fontFamily": "'Roboto sans-serif",
+                    "schema.polling.endpointFilter": "*localhost*",
+                },
             };
 
             const playground = renderPlaygroundPage(
