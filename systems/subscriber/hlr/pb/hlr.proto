@@ -1,0 +1,104 @@
+syntax = "proto3";
+
+option go_package = "pb/gen";
+
+package ukama.hss.v1;
+
+import "google/api/annotations.proto";
+import "validator.proto";
+
+service HlrRecordService {
+    rpc Get(GetRecordReq) returns (GetRecordResp);
+    rpc Add(AddRecordReq) returns (AddRecordResp);
+    rpc Update(UpdateRecordReq) returns (UpdateRecordResp);
+    rpc Delete(DeleteRecordReq) returns (DeleteRecordResp);
+    rpc UpdateGuti (UpdateGutiReq) returns (UpdateGutiResp);
+    rpc UpdateTai (UpdateTaiReq) returns (UpdateTaiResp);
+
+}
+
+
+message Record {
+    string imsi = 1 [(validator.field) = { string_not_empty: true,  length_gt: 5, length_lt: 16}];
+    string simId = 2 [(validator.field) = {uuid_ver: 0, string_not_empty: true}];
+    bytes Key = 3;
+    bytes Op = 4;
+    bytes Amf = 5;
+    Apn Apn = 6;
+    uint32 AlgoType = 7 [json_name="algo_type"];
+    uint32 UeDlAmbrBps = 8 [json_name="ue_dl_ambr_bps"];
+    uint32 UeUlAmbrBps = 9 [json_name="ue_ul_ambr_bps"];
+    uint64 Sqn  = 10;
+    bool CsgIdPrsent = 11 [json_name="csg_id_prsent"];
+    uint32 CsgId = 12 [json_name="csg_id"];
+}
+
+message Apn {
+    string Name = 1;
+}
+
+message GetRecordReq {
+    string Imsi = 2 [(validator.field) = { string_not_empty: true,  length_gt: 5, length_lt: 16}];
+}
+
+
+message GetRecordResp{
+    Record Record = 1;
+}
+
+message AddRecordReq {
+    Record Record = 2 [(validator.field) = { string_not_empty: true,  length_gt: 5, length_lt: 16}];
+}
+
+message AddRecordResp {
+
+}
+
+message UpdateRecordReq{
+    string Imsi=1 [(validator.field) = { string_not_empty: true,  length_gt: 5, length_lt: 16}];
+    Record Record = 2  [(validator.field) = { msg_exists: true }]; // imsi field cannot be updated
+}
+
+message UpdateRecordResp{
+
+}
+
+message DeleteRecordReq{
+    oneof id_oneof {
+        string Imsi = 1 [(validator.field) = { string_not_empty: true,  length_gt: 5, length_lt: 16}];
+        string SimId = 2 [(validator.field) = {uuid_ver: 0, string_not_empty: true}];
+    }
+}
+
+message DeleteRecordResp {
+
+}
+
+
+message UpdateGutiReq{
+    string Imsi = 1 [(validator.field) = { string_not_empty: true,  length_gt: 5, length_lt: 16}];
+    Guti Guti = 2 [(validator.field) = { msg_exists: true }];
+    uint32 UpdatedAt = 4 [json_name="updated_at",(validator.field) = { int_gt: 1639144053}]; // unix timestamp
+}
+
+message Guti{
+    string PlmnId = 1 [json_name="plmn_id", (validator.field) = { string_not_empty: true,  length_gt: 5, length_lt: 7}];
+    uint32 Mmegi  = 2;
+    uint32  Mmec = 3;
+    uint32  Mtmsi = 4;
+}
+
+message UpdateGutiResp{
+
+}
+
+message UpdateTaiReq{
+    string Imsi = 1;
+    string PlmnId = 2 [json_name="plmn_id", (validator.field) = { string_not_empty: true,  length_gt: 5, length_lt: 7}];
+    uint32 Tac = 3 [(validator.field) = { string_not_empty: true, length_lt: 65537}]; // 16 bit max
+    uint32 UpdatedAt = 4 [json_name="updated_at", (validator.field) = { int_gt: 1639144053} ]; // unix timestamp
+}
+
+message UpdateTaiResp{
+
+}
