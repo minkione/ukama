@@ -2,11 +2,8 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"time"
 
-	"github.com/google/uuid"
-	"github.com/sirupsen/logrus"
 	"github.com/ukama/ukama/systems/common/grpc"
 	pb "github.com/ukama/ukama/systems/subscriber/hlr/pb/gen"
 	"github.com/ukama/ukama/systems/subscriber/hlr/pkg/db"
@@ -34,10 +31,11 @@ func (s *HlrRecordServer) Get(c context.Context, r *pb.GetRecordReq) (*pb.GetRec
 	}
 
 	resp := &pb.GetRecordResp{Record: &pb.Record{
-		Imsi: sub.Imsi,
-		Key:  sub.Key,
-		Amf:  sub.Amf,
-		Op:   sub.Op,
+		Imsi:  sub.Imsi,
+		Iccid: sub.Iccid,
+		Key:   sub.Key,
+		Amf:   sub.Amf,
+		Op:    sub.Op,
 		Apn: &pb.Apn{
 			Name: sub.DefaultApnName,
 		},
@@ -52,34 +50,32 @@ func (s *HlrRecordServer) Get(c context.Context, r *pb.GetRecordReq) (*pb.GetRec
 	return resp, nil
 }
 
-func (s *HlrRecordServer) Add(c context.Context, a *pb.AddRecordReq) (*pb.AddRecordResp, error) {
-	sub := a.Record
+func (s *HlrRecordServer) Activate(c context.Context, req *pb.ActivateReq) (*pb.ActivateResp, error) {
 
-	dbSub, err := grpcHlrRecordToDb(sub, a.Record.Network.name)
-	if err != nil {
-		return nil, err
-	}
-	err = s.hlrRepo.Add(a.Org, dbSub)
-
-	if err != nil {
-		return nil, grpc.SqlErrorToGrpc(err, "imsi")
+	hlr := &db.Hlr{
+		Iccid: req.Iccid,
 	}
 
-	return &pb.AddRecordResp{}, err
+	/* Send Request to SIM Factory */
+
+	/* Send message to PCRF */
+
+	/* Add to HLR */
+	err := s.hlrRepo.Add(req.Network, hlr)
+	if err != nil {
+		return nil, grpc.SqlErrorToGrpc(err, "iccid")
+	}
+
+	return &pb.ActivateResp{}, err
 }
 
 func (s *HlrRecordServer) Update(c context.Context, req *pb.UpdateRecordReq) (*pb.UpdateRecordResp, error) {
-	imsi, err := s.hlrRepo.GetByImsi(req.Imsi)
+	rec, err := s.hlrRepo.GetByImsi(req.Imsi)
 	if err != nil {
 		return nil, grpc.SqlErrorToGrpc(err, "error getting imsi")
 	}
 
-	dbSub, err := grpcHlrRecordToDb(req.Imsi, imsi.Network.Name)
-	if err != nil {
-		return nil, err
-	}
-
-	err = s.hlrRepo.Update(req.Imsi, dbSub)
+	err = s.hlrRepo.Update(req.Imsi, rec)
 	if err != nil {
 		return nil, grpc.SqlErrorToGrpc(err, "imsi")
 	}
@@ -87,48 +83,34 @@ func (s *HlrRecordServer) Update(c context.Context, req *pb.UpdateRecordReq) (*p
 	return &pb.UpdateRecordResp{}, nil
 }
 
-func (s *HlrRecordServer) Delete(c context.Context, req *pb.DeleteRecordReq) (resp *pb.DeleteRecordResp, err error) {
-	var delHlrRecord *db.HlrRecord
-	switch req.IdOneof.(type) {
-	case *pb.DeleteRecordReq_HlrRecord:
+func (s *HlrRecordServer) Inactivate(c context.Context, req *pb.InactivateReq) (resp *pb.InactivateResp, err error) {
+	var delHlrRecord *db.Hlr
+	switch req.Id.(type) {
+	case *pb.InactivateReq_Imsi:
 
 		delHlrRecord, err = s.hlrRepo.GetByImsi(req.GetImsi())
 		if err != nil {
 			return nil, grpc.SqlErrorToGrpc(err, "imsi")
 		}
 
-	case *pb.DeleteRecordReq_UserId:
-		uuid, err := uuid.Parse(req.GetUserId())
-		if err != nil {
-			logrus.Errorf("Error parsing uuid %s. Error: %s", uuid, err)
-			return nil, fmt.Errorf("error parsing uuid")
-		}
-
-		imsis, err := s.hlrRepo.GetHlrRecordByUserUuid(uuid)
+	case *pb.InactivateReq_Iccid:
+		delHlrRecord, err = s.hlrRepo.GetByIccid(req.GetIccid())
 		if err != nil {
 			return nil, grpc.SqlErrorToGrpc(err, "imsi")
 		}
-
-		if len(imsis) == 1 {
-			delHlrRecord = imsis[0]
-		} else if len(imsis) == 0 {
-			return nil, status.Error(codes.NotFound, "imsi not found")
-		} else {
-			return nil, status.Error(codes.Internal, "invalid number of imsis found")
-		}
 	}
 
-	err = s.hlrRepo.Delete(delHlrRecord.HlrRecord)
+	err = s.hlrRepo.Delete(delHlrRecord.Imsi)
 	if err != nil {
 		return nil, grpc.SqlErrorToGrpc(err, "imsi")
 	}
 
-	return &pb.DeleteRecordResp{}, nil
+	return &pb.InactivateResp{}, nil
 
 }
 
 func (s *HlrRecordServer) UpdateGuti(c context.Context, req *pb.UpdateGutiReq) (*pb.UpdateGutiResp, error) {
-	imsi, err := s.hlrRepo.GetByImsi(req.Imsi)
+	_, err := s.hlrRepo.GetByImsi(req.Imsi)
 	if err != nil {
 		return nil, grpc.SqlErrorToGrpc(err, "imsi")
 	}
@@ -152,7 +134,7 @@ func (s *HlrRecordServer) UpdateGuti(c context.Context, req *pb.UpdateGutiReq) (
 }
 
 func (s *HlrRecordServer) UpdateTai(c context.Context, req *pb.UpdateTaiReq) (*pb.UpdateTaiResp, error) {
-	imsi, err := s.hlrRepo.GetByImsi(req.Imsi)
+	_, err := s.hlrRepo.GetByImsi(req.Imsi)
 	if err != nil {
 		return nil, grpc.SqlErrorToGrpc(err, "imsi")
 	}
@@ -173,11 +155,11 @@ func (s *HlrRecordServer) UpdateTai(c context.Context, req *pb.UpdateTaiReq) (*p
 	return &pb.UpdateTaiResp{}, nil
 }
 
-func grpcHlrRecordToDb(sub *pb.Record, netName string) (*db.HlrRecord, error) {
+func grpcHlrRecordToDb(sub *pb.Record, netName string) (*db.Hlr, error) {
 
-	dbSub := &db.HlrRecord{
+	dbSub := &db.Hlr{
 		Imsi:           sub.Imsi,
-		UserUuid:       userId,
+		Iccid:          sub.Iccid,
 		DefaultApnName: sub.Apn.Name,
 		Key:            sub.Key,
 		Amf:            sub.Amf,

@@ -8,10 +8,15 @@ import "google/api/annotations.proto";
 import "validator.proto";
 
 service HlrRecordService {
-    rpc Get(GetRecordReq) returns (GetRecordResp);
-    rpc Add(AddRecordReq) returns (AddRecordResp);
+
     rpc Update(UpdateRecordReq) returns (UpdateRecordResp);
-    rpc Delete(DeleteRecordReq) returns (DeleteRecordResp);
+
+    /* Subscriber Agent */ 
+    rpc Activate(ActivateReq) returns (ActivateResp);
+    rpc Inactivate(InactivateReq) returns (InactivateResp);
+    
+    /* Noe Gateway */
+    rpc Get(GetRecordReq) returns (GetRecordResp);
     rpc UpdateGuti (UpdateGutiReq) returns (UpdateGutiResp);
     rpc UpdateTai (UpdateTaiReq) returns (UpdateTaiResp);
 
@@ -19,18 +24,19 @@ service HlrRecordService {
 
 
 message Record {
-    string imsi = 1 [(validator.field) = { string_not_empty: true,  length_gt: 5, length_lt: 16}];
-    string simId = 2 [(validator.field) = {uuid_ver: 0, string_not_empty: true}];
-    bytes Key = 3;
-    bytes Op = 4;
-    bytes Amf = 5;
-    Apn Apn = 6;
-    uint32 AlgoType = 7 [json_name="algo_type"];
-    uint32 UeDlAmbrBps = 8 [json_name="ue_dl_ambr_bps"];
-    uint32 UeUlAmbrBps = 9 [json_name="ue_ul_ambr_bps"];
-    uint64 Sqn  = 10;
-    bool CsgIdPrsent = 11 [json_name="csg_id_prsent"];
-    uint32 CsgId = 12 [json_name="csg_id"];
+    string Imsi = 1 [(validator.field) = { string_not_empty: true,  length_gt: 5, length_lt: 16 }, json_name="imsi"];
+    string SimId = 2 [(validator.field) = {uuid_ver: 0, string_not_empty: true}, json_name="simId"];
+    string Iccid = 3 [(validator.field) = {string_not_empty: true,  length_gt: 5, length_lt: 16}, json_name="iccid"];
+    bytes Key = 4[json_name="k"];
+    bytes Op = 5[json_name="op"];
+    bytes Amf = 6[json_name="amf"];
+    Apn Apn = 7 [json_name="apn"];
+    uint32 AlgoType = 8 [json_name="algo_type"];
+    uint32 UeDlAmbrBps = 9 [json_name="ue_dl_ambr_bps"];
+    uint32 UeUlAmbrBps = 10 [json_name="ue_ul_ambr_bps"];
+    uint64 Sqn  = 11 [json_name="sqn"];
+    bool CsgIdPrsent = 12 [json_name="csg_id_prsent"];
+    uint32 CsgId = 13 [json_name="csg_id"];
 }
 
 message Apn {
@@ -38,6 +44,7 @@ message Apn {
 }
 
 message GetRecordReq {
+    string network = 1[(validator.field) = {uuid_ver: 0, string_not_empty: true}, json_name="network"]; // Mesh will add this info based on connection.
     string Imsi = 2 [(validator.field) = { string_not_empty: true,  length_gt: 5, length_lt: 16}];
 }
 
@@ -46,7 +53,30 @@ message GetRecordResp{
     Record Record = 1;
 }
 
+message ActivateReq {
+    string network = 1[(validator.field) = {uuid_ver: 0, string_not_empty: true}, json_name="network"];
+    string Iccid = 2 [(validator.field) = { string_not_empty: true,  length_gt: 18, length_lt: 22}, json_name="iccid"];
+}
+
+message ActivateResp {
+    
+}
+
+message InactivateReq {
+    string network = 1[(validator.field) = {uuid_ver: 0, string_not_empty: true}, json_name="network"];
+    oneof id {
+        string Imsi = 2 [(validator.field) = { string_not_empty: true,  length_gt: 5, length_lt: 16}];
+        string Iccid = 3 [(validator.field) = {string_not_empty: true}];
+    }
+}
+
+message InactivateResp {
+    
+}
+
+
 message AddRecordReq {
+    string network = 1[(validator.field) = {uuid_ver: 0, string_not_empty: true}, json_name="network"];
     Record Record = 2 [(validator.field) = { string_not_empty: true,  length_gt: 5, length_lt: 16}];
 }
 
@@ -64,9 +94,10 @@ message UpdateRecordResp{
 }
 
 message DeleteRecordReq{
+    
     oneof id_oneof {
         string Imsi = 1 [(validator.field) = { string_not_empty: true,  length_gt: 5, length_lt: 16}];
-        string SimId = 2 [(validator.field) = {uuid_ver: 0, string_not_empty: true}];
+        string Iccid = 2 [(validator.field) = {string_not_empty: true}];
     }
 }
 

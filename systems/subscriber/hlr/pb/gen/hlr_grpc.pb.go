@@ -22,10 +22,12 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type HlrRecordServiceClient interface {
-	Get(ctx context.Context, in *GetRecordReq, opts ...grpc.CallOption) (*GetRecordResp, error)
-	Add(ctx context.Context, in *AddRecordReq, opts ...grpc.CallOption) (*AddRecordResp, error)
 	Update(ctx context.Context, in *UpdateRecordReq, opts ...grpc.CallOption) (*UpdateRecordResp, error)
-	Delete(ctx context.Context, in *DeleteRecordReq, opts ...grpc.CallOption) (*DeleteRecordResp, error)
+	// Subscriber Agent
+	Activate(ctx context.Context, in *ActivateReq, opts ...grpc.CallOption) (*ActivateResp, error)
+	Inactivate(ctx context.Context, in *InactivateReq, opts ...grpc.CallOption) (*InactivateResp, error)
+	// Noe Gateway
+	Get(ctx context.Context, in *GetRecordReq, opts ...grpc.CallOption) (*GetRecordResp, error)
 	UpdateGuti(ctx context.Context, in *UpdateGutiReq, opts ...grpc.CallOption) (*UpdateGutiResp, error)
 	UpdateTai(ctx context.Context, in *UpdateTaiReq, opts ...grpc.CallOption) (*UpdateTaiResp, error)
 }
@@ -38,24 +40,6 @@ func NewHlrRecordServiceClient(cc grpc.ClientConnInterface) HlrRecordServiceClie
 	return &hlrRecordServiceClient{cc}
 }
 
-func (c *hlrRecordServiceClient) Get(ctx context.Context, in *GetRecordReq, opts ...grpc.CallOption) (*GetRecordResp, error) {
-	out := new(GetRecordResp)
-	err := c.cc.Invoke(ctx, "/ukama.hss.v1.HlrRecordService/Get", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *hlrRecordServiceClient) Add(ctx context.Context, in *AddRecordReq, opts ...grpc.CallOption) (*AddRecordResp, error) {
-	out := new(AddRecordResp)
-	err := c.cc.Invoke(ctx, "/ukama.hss.v1.HlrRecordService/Add", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *hlrRecordServiceClient) Update(ctx context.Context, in *UpdateRecordReq, opts ...grpc.CallOption) (*UpdateRecordResp, error) {
 	out := new(UpdateRecordResp)
 	err := c.cc.Invoke(ctx, "/ukama.hss.v1.HlrRecordService/Update", in, out, opts...)
@@ -65,9 +49,27 @@ func (c *hlrRecordServiceClient) Update(ctx context.Context, in *UpdateRecordReq
 	return out, nil
 }
 
-func (c *hlrRecordServiceClient) Delete(ctx context.Context, in *DeleteRecordReq, opts ...grpc.CallOption) (*DeleteRecordResp, error) {
-	out := new(DeleteRecordResp)
-	err := c.cc.Invoke(ctx, "/ukama.hss.v1.HlrRecordService/Delete", in, out, opts...)
+func (c *hlrRecordServiceClient) Activate(ctx context.Context, in *ActivateReq, opts ...grpc.CallOption) (*ActivateResp, error) {
+	out := new(ActivateResp)
+	err := c.cc.Invoke(ctx, "/ukama.hss.v1.HlrRecordService/Activate", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *hlrRecordServiceClient) Inactivate(ctx context.Context, in *InactivateReq, opts ...grpc.CallOption) (*InactivateResp, error) {
+	out := new(InactivateResp)
+	err := c.cc.Invoke(ctx, "/ukama.hss.v1.HlrRecordService/Inactivate", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *hlrRecordServiceClient) Get(ctx context.Context, in *GetRecordReq, opts ...grpc.CallOption) (*GetRecordResp, error) {
+	out := new(GetRecordResp)
+	err := c.cc.Invoke(ctx, "/ukama.hss.v1.HlrRecordService/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -96,10 +98,12 @@ func (c *hlrRecordServiceClient) UpdateTai(ctx context.Context, in *UpdateTaiReq
 // All implementations must embed UnimplementedHlrRecordServiceServer
 // for forward compatibility
 type HlrRecordServiceServer interface {
-	Get(context.Context, *GetRecordReq) (*GetRecordResp, error)
-	Add(context.Context, *AddRecordReq) (*AddRecordResp, error)
 	Update(context.Context, *UpdateRecordReq) (*UpdateRecordResp, error)
-	Delete(context.Context, *DeleteRecordReq) (*DeleteRecordResp, error)
+	// Subscriber Agent
+	Activate(context.Context, *ActivateReq) (*ActivateResp, error)
+	Inactivate(context.Context, *InactivateReq) (*InactivateResp, error)
+	// Noe Gateway
+	Get(context.Context, *GetRecordReq) (*GetRecordResp, error)
 	UpdateGuti(context.Context, *UpdateGutiReq) (*UpdateGutiResp, error)
 	UpdateTai(context.Context, *UpdateTaiReq) (*UpdateTaiResp, error)
 	mustEmbedUnimplementedHlrRecordServiceServer()
@@ -109,17 +113,17 @@ type HlrRecordServiceServer interface {
 type UnimplementedHlrRecordServiceServer struct {
 }
 
-func (UnimplementedHlrRecordServiceServer) Get(context.Context, *GetRecordReq) (*GetRecordResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
-}
-func (UnimplementedHlrRecordServiceServer) Add(context.Context, *AddRecordReq) (*AddRecordResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Add not implemented")
-}
 func (UnimplementedHlrRecordServiceServer) Update(context.Context, *UpdateRecordReq) (*UpdateRecordResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
-func (UnimplementedHlrRecordServiceServer) Delete(context.Context, *DeleteRecordReq) (*DeleteRecordResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+func (UnimplementedHlrRecordServiceServer) Activate(context.Context, *ActivateReq) (*ActivateResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Activate not implemented")
+}
+func (UnimplementedHlrRecordServiceServer) Inactivate(context.Context, *InactivateReq) (*InactivateResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Inactivate not implemented")
+}
+func (UnimplementedHlrRecordServiceServer) Get(context.Context, *GetRecordReq) (*GetRecordResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
 func (UnimplementedHlrRecordServiceServer) UpdateGuti(context.Context, *UpdateGutiReq) (*UpdateGutiResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateGuti not implemented")
@@ -140,42 +144,6 @@ func RegisterHlrRecordServiceServer(s grpc.ServiceRegistrar, srv HlrRecordServic
 	s.RegisterService(&HlrRecordService_ServiceDesc, srv)
 }
 
-func _HlrRecordService_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetRecordReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(HlrRecordServiceServer).Get(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/ukama.hss.v1.HlrRecordService/Get",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(HlrRecordServiceServer).Get(ctx, req.(*GetRecordReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _HlrRecordService_Add_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AddRecordReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(HlrRecordServiceServer).Add(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/ukama.hss.v1.HlrRecordService/Add",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(HlrRecordServiceServer).Add(ctx, req.(*AddRecordReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _HlrRecordService_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateRecordReq)
 	if err := dec(in); err != nil {
@@ -194,20 +162,56 @@ func _HlrRecordService_Update_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _HlrRecordService_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteRecordReq)
+func _HlrRecordService_Activate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ActivateReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(HlrRecordServiceServer).Delete(ctx, in)
+		return srv.(HlrRecordServiceServer).Activate(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ukama.hss.v1.HlrRecordService/Delete",
+		FullMethod: "/ukama.hss.v1.HlrRecordService/Activate",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(HlrRecordServiceServer).Delete(ctx, req.(*DeleteRecordReq))
+		return srv.(HlrRecordServiceServer).Activate(ctx, req.(*ActivateReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _HlrRecordService_Inactivate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InactivateReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(HlrRecordServiceServer).Inactivate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ukama.hss.v1.HlrRecordService/Inactivate",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(HlrRecordServiceServer).Inactivate(ctx, req.(*InactivateReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _HlrRecordService_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRecordReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(HlrRecordServiceServer).Get(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ukama.hss.v1.HlrRecordService/Get",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(HlrRecordServiceServer).Get(ctx, req.(*GetRecordReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -256,20 +260,20 @@ var HlrRecordService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*HlrRecordServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Get",
-			Handler:    _HlrRecordService_Get_Handler,
-		},
-		{
-			MethodName: "Add",
-			Handler:    _HlrRecordService_Add_Handler,
-		},
-		{
 			MethodName: "Update",
 			Handler:    _HlrRecordService_Update_Handler,
 		},
 		{
-			MethodName: "Delete",
-			Handler:    _HlrRecordService_Delete_Handler,
+			MethodName: "Activate",
+			Handler:    _HlrRecordService_Activate_Handler,
+		},
+		{
+			MethodName: "Inactivate",
+			Handler:    _HlrRecordService_Inactivate_Handler,
+		},
+		{
+			MethodName: "Get",
+			Handler:    _HlrRecordService_Get_Handler,
 		},
 		{
 			MethodName: "UpdateGuti",
