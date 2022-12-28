@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/ukama/ukama/systems/common/grpc"
 	pb "github.com/ukama/ukama/systems/subscriber/hlr/pb/gen"
 	"github.com/ukama/ukama/systems/subscriber/hlr/pkg/db"
@@ -161,8 +162,8 @@ func (s *HlrRecordServer) UpdateTai(c context.Context, req *pb.UpdateTaiReq) (*p
 	return &pb.UpdateTaiResp{}, nil
 }
 
-func grpcHlrRecordToDb(sub *pb.Record, netName string) (*db.Hlr, error) {
-
+func grpcHlrRecordToDb(sub *pb.Record, network string) (*db.Hlr, error) {
+	id, _ := uuid.Parse(network)
 	dbSub := &db.Hlr{
 		Imsi:           sub.Imsi,
 		Iccid:          sub.Iccid,
@@ -170,9 +171,7 @@ func grpcHlrRecordToDb(sub *pb.Record, netName string) (*db.Hlr, error) {
 		Key:            sub.Key,
 		Amf:            sub.Amf,
 		Op:             sub.Op,
-		Network: &db.Network{
-			Name: netName,
-		},
+		NetworkID:      id,
 	}
 
 	return dbSub, nil
