@@ -55,6 +55,7 @@ func (s *HlrRecordServer) Activate(c context.Context, req *pb.ActivateReq) (*pb.
 	hlr := &db.Hlr{
 		Iccid: req.Iccid,
 	}
+	/* Validate network in org*/
 
 	/* Send Request to SIM Factory */
 
@@ -85,6 +86,11 @@ func (s *HlrRecordServer) Update(c context.Context, req *pb.UpdateRecordReq) (*p
 
 func (s *HlrRecordServer) Inactivate(c context.Context, req *pb.InactivateReq) (resp *pb.InactivateResp, err error) {
 	var delHlrRecord *db.Hlr
+
+	/* validate network in org*/
+
+	/* Send message to PCRF */
+
 	switch req.Id.(type) {
 	case *pb.InactivateReq_Imsi:
 

@@ -15,10 +15,14 @@ service HlrRecordService {
     rpc Activate(ActivateReq) returns (ActivateResp);
     rpc Inactivate(InactivateReq) returns (InactivateResp);
     
-    /* Noe Gateway */
+    /* Node Gateway */
     rpc Get(GetRecordReq) returns (GetRecordResp);
     rpc UpdateGuti (UpdateGutiReq) returns (UpdateGutiResp);
     rpc UpdateTai (UpdateTaiReq) returns (UpdateTaiResp);
+
+    /* Network */
+    rpc AddNetwork(AddNetworkReq) returns (AddNetworkResp);
+    rpc DeleteNetworkResponse(DelNetworkResp) returns (DeleteNetworkResp); 
 
 }
 

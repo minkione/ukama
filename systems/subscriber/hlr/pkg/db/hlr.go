@@ -7,19 +7,11 @@ import (
 	"gorm.io/gorm"
 )
 
-type Network struct {
-	gorm.Model
-	Name      string `gorm:"not null;type:string;uniqueIndex:networkname_idx_case_insensetive,expression:lower(name),where:deleted_at is null"`
-	UserLimit uint
-	Hlrs      []Hlr
-}
-
 // Represents record in HSS db
 type Hlr struct {
 	gorm.Model
-	NetID   uint `gorm:"not null"`
-	Network *Network
-	Iccid   string `gorm:"index:imsi_unique_idx,unique,where:deleted_at is null;not null;size:22;check:iccid_checker,iccid ~ $$^\\d+$$"`
+
+	Iccid string `gorm:"index:imsi_unique_idx,unique,where:deleted_at is null;not null;size:22;check:iccid_checker,iccid ~ $$^\\d+$$"`
 	//IMSI might not be unique as same IMSI might be authorized to use multiple network of Org which means multiple enetry for the IMSI in HLR or may be use many to many relattion here.
 	// IMSI Sim ID  (International mobile subscriber identity) https://www.netmanias.com/en/post/blog/5929/lte/lte-user-identifiers-imsi-and-guti
 	Imsi string `gorm:"index:imsi_unique_idx,unique,where:deleted_at is null;not null;size:15;check:imsi_checker,imsi ~ $$^\\d+$$"`
@@ -36,7 +28,7 @@ type Hlr struct {
 	CsgIdPrsent    bool
 	CsgId          uint32
 	DefaultApnName string
-	UserUuid       uuid.UUID `gorm:"not null;type:uuid"`
+	NetworkID      uuid.UUID `gorm:"not null;type:uuid"`
 	Tai            Tai
 }
 
