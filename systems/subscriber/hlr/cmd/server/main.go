@@ -53,7 +53,7 @@ func runGrpcServer(gormdb sql.Db) {
 
 	// hlr service
 	hlrServer, err := server.NewHlrRecordServer(db.NewHlrRecordRepo(gormdb), db.NewGutiRepo(gormdb),
-		serviceConfig.FactoryHost, serviceConfig.NetworkHost, serviceConfig.PCRFHost)
+		serviceConfig.FactoryHost, serviceConfig.NetworkHost, serviceConfig.PCRFHost, serviceConfig.Org)
 
 	if err != nil {
 		log.Fatalf("hlr server initilization failed. Error: %v", err)

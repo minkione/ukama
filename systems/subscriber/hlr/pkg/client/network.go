@@ -27,7 +27,7 @@ func NewNetworkClient(url string, debug bool) (*Network, error) {
 	return N, nil
 }
 
-func (N *Network) ConfirmNetwork(networkId string, orgId string) error {
+func (N *Network) ValidateNetwork(networkId string, orgId string) error {
 
 	errStatus := &ErrorMessage{}
 

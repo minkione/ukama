@@ -14,6 +14,7 @@ service HlrRecordService {
     /* Subscriber Agent */ 
     rpc Activate(ActivateReq) returns (ActivateResp);
     rpc Inactivate(InactivateReq) returns (InactivateResp);
+    rpc UpdatePackage(UpdatePackageReq) returns (UpdatePackageResp); 
     
     /* Node Gateway */
     rpc Get(GetRecordReq) returns (GetRecordResp);
@@ -55,6 +56,7 @@ message GetRecordResp{
 message ActivateReq {
     string network = 1[(validator.field) = {uuid_ver: 0, string_not_empty: true}, json_name="network"];
     string Iccid = 2 [(validator.field) = { string_not_empty: true,  length_gt: 18, length_lt: 22}, json_name="iccid"];
+    string PackageId = 3;
 }
 
 message ActivateResp {
@@ -73,6 +75,15 @@ message InactivateResp {
     
 }
 
+message UpdatePackageReq {
+    string Network = 1[(validator.field) = {uuid_ver: 0, string_not_empty: true}, json_name="network"]; // Mesh will add this info based on connection.
+    string Imsi = 2 [(validator.field) = { string_not_empty: true,  length_gt: 5, length_lt: 16}];
+    string PackageId = 3[(validator.field) = {uuid_ver: 0, string_not_empty: true}, json_name="packageId"]; // Mesh will add this info based on connection.
+}
+
+message UpdatePackageResp {
+
+}
 
 message AddRecordReq {
     string network = 1[(validator.field) = {uuid_ver: 0, string_not_empty: true}, json_name="network"];

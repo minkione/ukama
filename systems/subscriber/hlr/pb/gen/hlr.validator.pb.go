@@ -140,6 +140,37 @@ func (this *InactivateResp) Validate() error {
 	return nil
 }
 
+var _regex_UpdatePackageReq_Network = regexp.MustCompile(`^([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[1-5][a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})?$`)
+var _regex_UpdatePackageReq_PackageId = regexp.MustCompile(`^([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[1-5][a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})?$`)
+
+func (this *UpdatePackageReq) Validate() error {
+	if !_regex_UpdatePackageReq_Network.MatchString(this.Network) {
+		return github_com_mwitkow_go_proto_validators.FieldError("Network", fmt.Errorf(`value '%v' must be a string conforming to regex "^([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[1-5][a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})?$"`, this.Network))
+	}
+	if this.Network == "" {
+		return github_com_mwitkow_go_proto_validators.FieldError("Network", fmt.Errorf(`value '%v' must not be an empty string`, this.Network))
+	}
+	if this.Imsi == "" {
+		return github_com_mwitkow_go_proto_validators.FieldError("Imsi", fmt.Errorf(`value '%v' must not be an empty string`, this.Imsi))
+	}
+	if !(len(this.Imsi) > 5) {
+		return github_com_mwitkow_go_proto_validators.FieldError("Imsi", fmt.Errorf(`value '%v' must have a length greater than '5'`, this.Imsi))
+	}
+	if !(len(this.Imsi) < 16) {
+		return github_com_mwitkow_go_proto_validators.FieldError("Imsi", fmt.Errorf(`value '%v' must have a length smaller than '16'`, this.Imsi))
+	}
+	if !_regex_UpdatePackageReq_PackageId.MatchString(this.PackageId) {
+		return github_com_mwitkow_go_proto_validators.FieldError("PackageId", fmt.Errorf(`value '%v' must be a string conforming to regex "^([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[1-5][a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})?$"`, this.PackageId))
+	}
+	if this.PackageId == "" {
+		return github_com_mwitkow_go_proto_validators.FieldError("PackageId", fmt.Errorf(`value '%v' must not be an empty string`, this.PackageId))
+	}
+	return nil
+}
+func (this *UpdatePackageResp) Validate() error {
+	return nil
+}
+
 var _regex_AddRecordReq_Network = regexp.MustCompile(`^([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[1-5][a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})?$`)
 
 func (this *AddRecordReq) Validate() error {

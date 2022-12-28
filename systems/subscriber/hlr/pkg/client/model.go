@@ -11,7 +11,7 @@ type SimCardInfo struct {
 	AlgoType       uint32
 	UeDlAmbrBps    uint32
 	UeUlAmbrBps    uint32
-	Sqn            uint32
+	Sqn            uint64
 	CsgIdPrsent    bool
 	CsgId          uint32
 	DefaultApnName string
@@ -31,7 +31,6 @@ type PolicyControlSimInfo struct {
 	NetworkId uuid.UUID
 	Visitor   bool
 }
-
 
 type PolicyControlSimPackageUpdate struct {
 	Imsi      string

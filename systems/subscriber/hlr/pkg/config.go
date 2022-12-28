@@ -13,6 +13,7 @@ type Config struct {
 	NetworkHost       string
 	PCRFHost          string
 	FactoryHost       string
+	Org               string
 }
 
 type SimManager struct {

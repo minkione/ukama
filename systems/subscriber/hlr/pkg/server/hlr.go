@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 	"github.com/ukama/ukama/systems/common/grpc"
 	pb "github.com/ukama/ukama/systems/subscriber/hlr/pb/gen"
 	"github.com/ukama/ukama/systems/subscriber/hlr/pkg"
@@ -21,9 +22,10 @@ type HlrRecordServer struct {
 	pcrf     *client.PolicyControl
 	network  *client.Network
 	factory  *client.Factory
+	Org      string
 }
 
-func NewHlrRecordServer(hlrRepo db.HlrRecordRepo, gutiRepo db.GutiRepo, factory string, network string, pcrf string) (*HlrRecordServer, error) {
+func NewHlrRecordServer(hlrRepo db.HlrRecordRepo, gutiRepo db.GutiRepo, factory string, network string, pcrf string, org string) (*HlrRecordServer, error) {
 
 	var err error
 
@@ -78,22 +80,127 @@ func (s *HlrRecordServer) Get(c context.Context, r *pb.GetRecordReq) (*pb.GetRec
 
 func (s *HlrRecordServer) Activate(c context.Context, req *pb.ActivateReq) (*pb.ActivateResp, error) {
 
-	hlr := &db.Hlr{
-		Iccid: req.Iccid,
+	/* Validate network in Org */
+	err := s.network.ValidateNetwork(req.Network, s.Org)
+	if err != nil {
+		return nil, grpc.SqlErrorToGrpc(err, "error validating network")
 	}
-	/* Validate network in org*/
 
 	/* Send Request to SIM Factory */
+	sim, err := s.factory.ReadSimCardInfo(req.Iccid)
+	if err != nil {
+		return nil, grpc.SqlErrorToGrpc(err, "error reading iccid from factory")
+	}
 
 	/* Send message to PCRF */
+	nId, err := uuid.Parse(req.Network)
+	if err != nil {
+		logrus.Errorf("NetworkId not valid.")
+	}
+
+	pId, err := uuid.Parse(req.PackageId)
+	if err != nil {
+		logrus.Errorf("PackageId not valid.")
+	}
+
+	pcrfData := client.PolicyControlSimInfo{
+		Imsi:      sim.Imsi,
+		Iccid:     sim.Iccid,
+		PackageId: pId,
+		NetworkId: nId,
+		Visitor:   false, // We will using this flag on roaming in VLR
+	}
+
+	err = s.pcrf.AddSim(pcrfData)
+	if err != nil {
+		return nil, grpc.SqlErrorToGrpc(err, "error adding to pcrf")
+	}
 
 	/* Add to HLR */
-	err := s.hlrRepo.Add(req.Network, hlr)
+	hlr := &db.Hlr{
+		Iccid:          req.Iccid,
+		Imsi:           sim.Imsi,
+		Op:             sim.Op,
+		Key:            sim.Key,
+		Amf:            sim.Amf,
+		AlgoType:       sim.AlgoType,
+		UeDlAmbrBps:    sim.UeDlAmbrBps,
+		UeUlAmbrBps:    sim.UeUlAmbrBps,
+		Sqn:            uint64(sim.Sqn),
+		CsgIdPrsent:    sim.CsgIdPrsent,
+		CsgId:          sim.CsgId,
+		DefaultApnName: sim.DefaultApnName,
+	}
+
+	err = s.hlrRepo.Add(req.Network, hlr)
 	if err != nil {
-		return nil, grpc.SqlErrorToGrpc(err, "iccid")
+		return nil, grpc.SqlErrorToGrpc(err, "error updating hlr")
 	}
 
 	return &pb.ActivateResp{}, err
+}
+
+func (s *HlrRecordServer) UpdatePackage(c context.Context, req *pb.UpdatePackageReq) (*pb.UpdatePackageResp, error) {
+	rec, err := s.hlrRepo.GetByImsi(req.Imsi)
+	if err != nil {
+		return nil, grpc.SqlErrorToGrpc(err, "error getting imsi")
+	}
+
+	pId, err := uuid.Parse(req.PackageId)
+	if err != nil {
+		logrus.Errorf("PackageId not valid.")
+		return nil, grpc.SqlErrorToGrpc(err, "error invalid package id")
+	}
+
+	pD := client.PolicyControlSimPackageUpdate{
+		Imsi:      rec.Imsi,
+		PackageId: pId,
+	}
+
+	err = s.pcrf.UpdateSim(pD)
+	if err != nil {
+		return nil, grpc.SqlErrorToGrpc(err, "error updating pcrf")
+	}
+
+	return &pb.UpdatePackageResp{}, nil
+}
+
+func (s *HlrRecordServer) Inactivate(c context.Context, req *pb.InactivateReq) (*pb.InactivateResp, error) {
+	var delHlrRecord *db.Hlr
+
+	/* Validate network in Org */
+	err := s.network.ValidateNetwork(req.Network, s.Org)
+	if err != nil {
+		return nil, grpc.SqlErrorToGrpc(err, "error validating network")
+	}
+
+	switch req.Id.(type) {
+	case *pb.InactivateReq_Imsi:
+
+		delHlrRecord, err = s.hlrRepo.GetByImsi(req.GetImsi())
+		if err != nil {
+			return nil, grpc.SqlErrorToGrpc(err, "error getting imsi")
+		}
+
+	case *pb.InactivateReq_Iccid:
+		delHlrRecord, err = s.hlrRepo.GetByIccid(req.GetIccid())
+		if err != nil {
+			return nil, grpc.SqlErrorToGrpc(err, "error getting iccid")
+		}
+	}
+
+	err = s.pcrf.DeleteSim(delHlrRecord.Imsi)
+	if err != nil {
+		return nil, grpc.SqlErrorToGrpc(err, "error updating pcrf")
+	}
+
+	err = s.hlrRepo.Delete(delHlrRecord.Imsi)
+	if err != nil {
+		return nil, grpc.SqlErrorToGrpc(err, "error updating hlr")
+	}
+
+	return &pb.InactivateResp{}, nil
+
 }
 
 func (s *HlrRecordServer) Update(c context.Context, req *pb.UpdateRecordReq) (*pb.UpdateRecordResp, error) {
@@ -104,41 +211,10 @@ func (s *HlrRecordServer) Update(c context.Context, req *pb.UpdateRecordReq) (*p
 
 	err = s.hlrRepo.Update(req.Imsi, rec)
 	if err != nil {
-		return nil, grpc.SqlErrorToGrpc(err, "imsi")
+		return nil, grpc.SqlErrorToGrpc(err, "error updating hlr")
 	}
 
 	return &pb.UpdateRecordResp{}, nil
-}
-
-func (s *HlrRecordServer) Inactivate(c context.Context, req *pb.InactivateReq) (resp *pb.InactivateResp, err error) {
-	var delHlrRecord *db.Hlr
-
-	/* validate network in org*/
-
-	/* Send message to PCRF */
-
-	switch req.Id.(type) {
-	case *pb.InactivateReq_Imsi:
-
-		delHlrRecord, err = s.hlrRepo.GetByImsi(req.GetImsi())
-		if err != nil {
-			return nil, grpc.SqlErrorToGrpc(err, "imsi")
-		}
-
-	case *pb.InactivateReq_Iccid:
-		delHlrRecord, err = s.hlrRepo.GetByIccid(req.GetIccid())
-		if err != nil {
-			return nil, grpc.SqlErrorToGrpc(err, "imsi")
-		}
-	}
-
-	err = s.hlrRepo.Delete(delHlrRecord.Imsi)
-	if err != nil {
-		return nil, grpc.SqlErrorToGrpc(err, "imsi")
-	}
-
-	return &pb.InactivateResp{}, nil
-
 }
 
 func (s *HlrRecordServer) UpdateGuti(c context.Context, req *pb.UpdateGutiReq) (*pb.UpdateGutiResp, error) {
@@ -185,19 +261,4 @@ func (s *HlrRecordServer) UpdateTai(c context.Context, req *pb.UpdateTaiReq) (*p
 	}
 
 	return &pb.UpdateTaiResp{}, nil
-}
-
-func grpcHlrRecordToDb(sub *pb.Record, network string) (*db.Hlr, error) {
-	id, _ := uuid.Parse(network)
-	dbSub := &db.Hlr{
-		Imsi:           sub.Imsi,
-		Iccid:          sub.Iccid,
-		DefaultApnName: sub.Apn.Name,
-		Key:            sub.Key,
-		Amf:            sub.Amf,
-		Op:             sub.Op,
-		NetworkID:      id,
-	}
-
-	return dbSub, nil
 }
