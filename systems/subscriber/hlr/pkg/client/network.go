@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/sirupsen/logrus"
 	"github.com/ukama/ukama/systems/common/rest"
 )
@@ -31,17 +30,15 @@ func NewNetworkClient(url string, debug bool) (*Network, error) {
 func (N *Network) ConfirmNetwork(networkId string, orgId string) error {
 
 	errStatus := &ErrorMessage{}
-	var err error
-	resp := &resty.Response{}
 
 	network := NetworkInfo{}
 
-	resp, err = N.R.C.R().
+	resp, err := N.R.C.R().
 		SetError(errStatus).
 		Get(N.R.Url.String() + "v1/networks/" + networkId)
 
 	if err != nil {
-		logrus.Errorf("Failed to send api request to Factory. Error %s", err.Error())
+		logrus.Errorf("Failed to send api request to network registry. Error %s", err.Error())
 		return err
 	}
 
@@ -53,7 +50,7 @@ func (N *Network) ConfirmNetwork(networkId string, orgId string) error {
 	err = json.Unmarshal(resp.Body(), &network)
 	if err != nil {
 		logrus.Tracef("Failed to desrialize network info. Error message is %s", err.Error())
-		return fmt.Errorf("Network Info deserailization failure: %s", err.Error)
+		return fmt.Errorf("network info deserailization failure:" + err.Error())
 	}
 
 	if orgId != network.OrgID.String() {

@@ -26,7 +26,7 @@ type HlrRecordServiceClient interface {
 	// Subscriber Agent
 	Activate(ctx context.Context, in *ActivateReq, opts ...grpc.CallOption) (*ActivateResp, error)
 	Inactivate(ctx context.Context, in *InactivateReq, opts ...grpc.CallOption) (*InactivateResp, error)
-	// Noe Gateway
+	// Node Gateway
 	Get(ctx context.Context, in *GetRecordReq, opts ...grpc.CallOption) (*GetRecordResp, error)
 	UpdateGuti(ctx context.Context, in *UpdateGutiReq, opts ...grpc.CallOption) (*UpdateGutiResp, error)
 	UpdateTai(ctx context.Context, in *UpdateTaiReq, opts ...grpc.CallOption) (*UpdateTaiResp, error)
@@ -102,7 +102,7 @@ type HlrRecordServiceServer interface {
 	// Subscriber Agent
 	Activate(context.Context, *ActivateReq) (*ActivateResp, error)
 	Inactivate(context.Context, *InactivateReq) (*InactivateResp, error)
-	// Noe Gateway
+	// Node Gateway
 	Get(context.Context, *GetRecordReq) (*GetRecordResp, error)
 	UpdateGuti(context.Context, *UpdateGutiReq) (*UpdateGutiResp, error)
 	UpdateTai(context.Context, *UpdateTaiReq) (*UpdateTaiResp, error)

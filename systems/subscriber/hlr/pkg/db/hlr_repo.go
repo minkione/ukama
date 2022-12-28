@@ -19,7 +19,6 @@ type HlrRecordRepo interface {
 	GetByImsi(imsi string) (*Hlr, error)
 	GetByIccid(iccid string) (*Hlr, error)
 	Update(imsi string, record *Hlr) error
-	Inactivate(imsi string, nestedFunc ...func(*gorm.DB) error) error
 	DeleteByIccid(iccid string, nestedFunc ...func(*gorm.DB) error) error
 	Delete(imsi string, nestedFunc ...func(*gorm.DB) error) error
 	UpdateTai(imis string, tai Tai) error
@@ -36,12 +35,6 @@ func NewHlrRecordRepo(db sql.Db) *hlrRecordRepo {
 }
 
 func (r *hlrRecordRepo) Add(network string, rec *Hlr) error {
-	net, err := makeUserNetworkExist(r.db.GetGormDb(), network)
-	if err != nil {
-		return err
-	}
-
-	rec.NetID = net.ID
 	d := r.db.GetGormDb().Create(rec)
 	return d.Error
 }

@@ -19,11 +19,6 @@ service HlrRecordService {
     rpc Get(GetRecordReq) returns (GetRecordResp);
     rpc UpdateGuti (UpdateGutiReq) returns (UpdateGutiResp);
     rpc UpdateTai (UpdateTaiReq) returns (UpdateTaiResp);
-
-    /* Network */
-    rpc AddNetwork(AddNetworkReq) returns (AddNetworkResp);
-    rpc DeleteNetworkResponse(DelNetworkResp) returns (DeleteNetworkResp); 
-
 }
 
 

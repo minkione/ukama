@@ -2,7 +2,7 @@ include ../../config.mk
 
 .PHONY: integration.test test build lint deps 
 
-build: integration.build
+build:
 	@echo Building version: \"$(BIN_VER)\"
 	env CGO_ENABLED=0 go build -ldflags='-X github.com/ukama/ukama/systems/susbcsriber/hlr/cmd/version.Version=$(BIN_VER) -extldflags=-static' -o bin/hss cmd/server/main.go	
 

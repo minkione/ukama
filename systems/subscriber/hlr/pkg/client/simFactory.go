@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/sirupsen/logrus"
 	"github.com/ukama/ukama/systems/common/rest"
 )
@@ -36,15 +35,13 @@ func (f *Factory) ReadSimCardInfo(Iccid string) (*SimCardInfo, error) {
 
 	card := SimCardInfo{}
 	errStatus := &ErrorMessage{}
-	var err error
-	resp := &resty.Response{}
 
 	query := map[string]string{
 		"iccid": Iccid,
 	}
 
 	logrus.Debugf("Posting GET: Query +%v", query)
-	resp, err = f.R.C.R().
+	resp, err := f.R.C.R().
 		SetError(errStatus).
 		SetQueryParams(query).
 		Get(f.R.Url.String() + "v1/simcard")
@@ -62,7 +59,7 @@ func (f *Factory) ReadSimCardInfo(Iccid string) (*SimCardInfo, error) {
 	err = json.Unmarshal(resp.Body(), &card)
 	if err != nil {
 		logrus.Tracef("Failed to desrialize sim card info. Error message is %s", err.Error())
-		return nil, fmt.Errorf("Simcard request failure: %s", err.Error)
+		return nil, fmt.Errorf("simcard info deserailization failure: %s" + err.Error())
 	}
 
 	return &card, nil

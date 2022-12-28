@@ -10,6 +10,9 @@ type Config struct {
 	Grpc              config.Grpc
 	SimTokenKey       string
 	HlrHost           string
+	NetworkHost       string
+	PCRF              string
+	Factory           string
 }
 
 type SimManager struct {

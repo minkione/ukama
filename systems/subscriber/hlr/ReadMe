@@ -1,4 +1,0 @@
-# Assumptions:
-
-Will be listening to network creation events for the org. 
-And create a network based on these events.  
