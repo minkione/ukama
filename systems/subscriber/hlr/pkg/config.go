@@ -11,8 +11,8 @@ type Config struct {
 	SimTokenKey       string
 	HlrHost           string
 	NetworkHost       string
-	PCRF              string
-	Factory           string
+	PCRFHost          string
+	FactoryHost       string
 }
 
 type SimManager struct {
@@ -36,5 +36,8 @@ func NewConfig() *Config {
 		},
 		SimTokenKey: "11111111111111111111111111111111",
 		HlrHost:     "localhost:9090",
+		NetworkHost: "localhost:9090",
+		PCRFHost:    "localhost:9090",
+		FactoryHost: "localhost:9090",
 	}
 }

@@ -7,6 +7,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/ukama/ukama/systems/common/grpc"
 	pb "github.com/ukama/ukama/systems/subscriber/hlr/pb/gen"
+	"github.com/ukama/ukama/systems/subscriber/hlr/pkg"
+	"github.com/ukama/ukama/systems/subscriber/hlr/pkg/client"
 	"github.com/ukama/ukama/systems/subscriber/hlr/pkg/db"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -16,13 +18,36 @@ type HlrRecordServer struct {
 	pb.UnimplementedHlrRecordServiceServer
 	hlrRepo  db.HlrRecordRepo
 	gutiRepo db.GutiRepo
+	pcrf     *client.PolicyControl
+	network  *client.Network
+	factory  *client.Factory
 }
 
-func NewHlrRecordServer(hlrRepo db.HlrRecordRepo, gutiRepo db.GutiRepo) *HlrRecordServer {
-	return &HlrRecordServer{
+func NewHlrRecordServer(hlrRepo db.HlrRecordRepo, gutiRepo db.GutiRepo, factory string, network string, pcrf string) (*HlrRecordServer, error) {
+
+	var err error
+
+	hlr := HlrRecordServer{
 		hlrRepo:  hlrRepo,
 		gutiRepo: gutiRepo,
 	}
+
+	hlr.factory, err = client.NewFactoryClient(factory, pkg.IsDebugMode)
+	if err != nil {
+		return nil, err
+	}
+
+	hlr.network, err = client.NewNetworkClient(network, pkg.IsDebugMode)
+	if err != nil {
+		return nil, err
+	}
+
+	hlr.pcrf, err = client.NewPolicyControlClient(pcrf, pkg.IsDebugMode)
+	if err != nil {
+		return nil, err
+	}
+
+	return &hlr, nil
 }
 
 func (s *HlrRecordServer) Get(c context.Context, r *pb.GetRecordReq) (*pb.GetRecordResp, error) {

@@ -3,4 +3,4 @@ package pkg
 const ServiceName = "hlr"
 const SystemName = "subscriber"
 
-var IsDebugMode bool = false
+var IsDebugMode bool = true

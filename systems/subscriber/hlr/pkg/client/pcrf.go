@@ -11,7 +11,7 @@ type PolicyControl struct {
 	R *rest.RestClient
 }
 
-func PolicyControlClient(url string, debug bool) (*PolicyControl, error) {
+func NewPolicyControlClient(url string, debug bool) (*PolicyControl, error) {
 
 	f, err := rest.NewRestClient(url, debug)
 	if err != nil {
