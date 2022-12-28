@@ -1,0 +1,65 @@
+package client
+
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/go-resty/resty/v2"
+	"github.com/sirupsen/logrus"
+	"github.com/ukama/ukama/systems/common/rest"
+)
+
+type Network struct {
+	R *rest.RestClient
+}
+
+func NewNetworkClient(url string, debug bool) (*Network, error) {
+
+	f, err := rest.NewRestClient(url, debug)
+	if err != nil {
+		logrus.Errorf("Can't conncet to %s url.Error %s", url, err.Error)
+		return nil, err
+	}
+
+	N := &Network{
+		R: f,
+	}
+
+	return N, nil
+}
+
+func (N *Network) ConfirmNetwork(networkId string, orgId string) error {
+
+	errStatus := &ErrorMessage{}
+	var err error
+	resp := &resty.Response{}
+
+	network := NetworkInfo{}
+
+	resp, err = N.R.C.R().
+		SetError(errStatus).
+		Get(N.R.Url.String() + "v1/networks/" + networkId)
+
+	if err != nil {
+		logrus.Errorf("Failed to send api request to Factory. Error %s", err.Error())
+		return err
+	}
+
+	if !resp.IsSuccess() {
+		logrus.Tracef("Failed to fetch network info. HTTP resp code %d and Error message is %s", resp.StatusCode(), errStatus.Message)
+		return fmt.Errorf(" Network Info failure %s", errStatus.Message)
+	}
+
+	err = json.Unmarshal(resp.Body(), &network)
+	if err != nil {
+		logrus.Tracef("Failed to desrialize network info. Error message is %s", err.Error())
+		return fmt.Errorf("Network Info deserailization failure: %s", err.Error)
+	}
+
+	if orgId != network.OrgID.String() {
+		logrus.Error("Missing network.")
+		return fmt.Errorf("Network mismatch")
+	}
+
+	return nil
+}
