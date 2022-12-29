@@ -35,7 +35,7 @@ func (N *Network) ValidateNetwork(networkId string, orgId string) error {
 
 	resp, err := N.R.C.R().
 		SetError(errStatus).
-		Get(N.R.Url.String() + "v1/networks/" + networkId)
+		Get(N.R.Url.String() + "v1/networks/" + networkId + "/orgs" + orgId)
 
 	if err != nil {
 		logrus.Errorf("Failed to send api request to network registry. Error %s", err.Error())

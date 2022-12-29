@@ -36,15 +36,9 @@ func (f *Factory) ReadSimCardInfo(Iccid string) (*SimCardInfo, error) {
 	card := SimCardInfo{}
 	errStatus := &ErrorMessage{}
 
-	query := map[string]string{
-		"iccid": Iccid,
-	}
-
-	logrus.Debugf("Posting GET: Query +%v", query)
 	resp, err := f.R.C.R().
 		SetError(errStatus).
-		SetQueryParams(query).
-		Get(f.R.Url.String() + "v1/simcard")
+		Get(f.R.Url.String() + "v1/factory/simcards/" + Iccid)
 
 	if err != nil {
 		logrus.Errorf("Failed to send api request to Factory. Error %s", err.Error())

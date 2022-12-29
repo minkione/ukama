@@ -25,7 +25,7 @@ type NetworkInfo struct {
 }
 
 type PolicyControlSimInfo struct {
-	Imsi      string
+	Imsi      string `path:"imsi" validate:"required" json:"-"`
 	Iccid     string
 	PackageId uuid.UUID
 	NetworkId uuid.UUID
@@ -33,6 +33,6 @@ type PolicyControlSimInfo struct {
 }
 
 type PolicyControlSimPackageUpdate struct {
-	Imsi      string
+	Imsi      string `path:"imsi" validate:"required" json:"-"`
 	PackageId uuid.UUID
 }
