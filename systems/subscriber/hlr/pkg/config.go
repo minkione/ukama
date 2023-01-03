@@ -36,9 +36,10 @@ func NewConfig() *Config {
 			Port: 9090,
 		},
 		SimTokenKey: "11111111111111111111111111111111",
-		HlrHost:     "localhost:9090",
-		NetworkHost: "localhost:9090",
-		PCRFHost:    "localhost:9090",
-		FactoryHost: "localhost:9090",
+		HlrHost:     "localhost:8080",
+		NetworkHost: "http://localhost:8085",
+		PCRFHost:    "http://localhost:8085",
+		FactoryHost: "http://localhost:8085",
+		Org:         "880f7c63-eb57-461a-b514-248ce91e9b3e",
 	}
 }

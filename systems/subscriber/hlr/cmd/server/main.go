@@ -13,6 +13,7 @@ import (
 
 	"github.com/ukama/ukama/systems/subscriber/hlr/pkg/db"
 
+	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 	ccmd "github.com/ukama/ukama/systems/common/cmd"
 	"github.com/ukama/ukama/systems/common/config"
@@ -37,6 +38,7 @@ func initConfig() {
 	serviceConfig = pkg.NewConfig()
 	config.LoadConfig(pkg.ServiceName, serviceConfig)
 	pkg.IsDebugMode = serviceConfig.DebugMode
+	logrus.Infof("Config: %+v", serviceConfig)
 }
 
 func initDb() sql.Db {

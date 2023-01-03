@@ -19,6 +19,7 @@ type HlrRecordRepo interface {
 	GetByImsi(imsi string) (*Hlr, error)
 	GetByIccid(iccid string) (*Hlr, error)
 	Update(imsi string, record *Hlr) error
+	UpdatePackage(imsi string, packageId string) error
 	DeleteByIccid(iccid string, nestedFunc ...func(*gorm.DB) error) error
 	Delete(imsi string, nestedFunc ...func(*gorm.DB) error) error
 	UpdateTai(imis string, tai Tai) error
@@ -40,6 +41,12 @@ func (r *hlrRecordRepo) Add(network string, rec *Hlr) error {
 }
 
 func (r *hlrRecordRepo) Update(imsiToUpdate string, rec *Hlr) error {
+	d := r.db.GetGormDb().Where("imsi=?", imsiToUpdate).Updates(rec)
+	return d.Error
+}
+
+func (r *hlrRecordRepo) UpdatePackage(imsiToUpdate string, packageId string) error {
+	rec := &Hlr{PackageId: packageId}
 	d := r.db.GetGormDb().Where("imsi=?", imsiToUpdate).Updates(rec)
 	return d.Error
 }
@@ -97,7 +104,7 @@ func (r *hlrRecordRepo) UpdateTai(imsi string, tai Tai) error {
 		}
 
 		var count int64
-		err = tx.Model(&tai).Where("imsi_id = ? and device_updated_at >= ?", imsiM.ID, tai.DeviceUpdatedAt).Count(&count).Error
+		err = tx.Model(&tai).Where("hlr_id = ? and device_updated_at >= ?", imsiM.ID, tai.DeviceUpdatedAt).Count(&count).Error
 		if err != nil {
 			return errors.Wrap(err, "error getting tai count")
 		}
@@ -105,7 +112,7 @@ func (r *hlrRecordRepo) UpdateTai(imsi string, tai Tai) error {
 			return fmt.Errorf(TaiNotUpdatedErr)
 		}
 
-		err = tx.Where("imsi_id=?", imsiM.ID).Delete(&Tai{}).Error
+		err = tx.Where("hlr_id=?", imsiM.ID).Delete(&Tai{}).Error
 		if err != nil {
 			return errors.Wrap(err, "error deleting tai")
 		}

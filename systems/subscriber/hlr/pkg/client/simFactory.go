@@ -38,7 +38,7 @@ func (f *Factory) ReadSimCardInfo(Iccid string) (*SimCardInfo, error) {
 
 	resp, err := f.R.C.R().
 		SetError(errStatus).
-		Get(f.R.Url.String() + "v1/factory/simcards/" + Iccid)
+		Get(f.R.Url.String() + "/v1/factory/simcards/" + Iccid)
 
 	if err != nil {
 		logrus.Errorf("Failed to send api request to Factory. Error %s", err.Error())

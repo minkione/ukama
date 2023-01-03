@@ -32,6 +32,7 @@ func NewHlrRecordServer(hlrRepo db.HlrRecordRepo, gutiRepo db.GutiRepo, factory 
 	hlr := HlrRecordServer{
 		hlrRepo:  hlrRepo,
 		gutiRepo: gutiRepo,
+		Org:      org,
 	}
 
 	hlr.factory, err = client.NewFactoryClient(factory, pkg.IsDebugMode)
@@ -73,8 +74,9 @@ func (s *HlrRecordServer) Get(c context.Context, r *pb.GetRecordReq) (*pb.GetRec
 		Sqn:         sub.Sqn,
 		UeDlAmbrBps: sub.UeDlAmbrBps,
 		UeUlAmbrBps: sub.UeDlAmbrBps,
+		PackageId:   sub.PackageId,
 	}}
-
+	logrus.Infof("Subscriber %s is having %+v", r.Imsi, resp)
 	return resp, nil
 }
 
@@ -130,6 +132,7 @@ func (s *HlrRecordServer) Activate(c context.Context, req *pb.ActivateReq) (*pb.
 		CsgIdPrsent:    sim.CsgIdPrsent,
 		CsgId:          sim.CsgId,
 		DefaultApnName: sim.DefaultApnName,
+		PackageId:      req.PackageId,
 	}
 
 	err = s.hlrRepo.Add(req.Network, hlr)
@@ -141,9 +144,9 @@ func (s *HlrRecordServer) Activate(c context.Context, req *pb.ActivateReq) (*pb.
 }
 
 func (s *HlrRecordServer) UpdatePackage(c context.Context, req *pb.UpdatePackageReq) (*pb.UpdatePackageResp, error) {
-	rec, err := s.hlrRepo.GetByImsi(req.Imsi)
+	hlrRecord, err := s.hlrRepo.GetByIccid(req.GetIccid())
 	if err != nil {
-		return nil, grpc.SqlErrorToGrpc(err, "error getting imsi")
+		return nil, grpc.SqlErrorToGrpc(err, "error getting iccid")
 	}
 
 	pId, err := uuid.Parse(req.PackageId)
@@ -153,13 +156,18 @@ func (s *HlrRecordServer) UpdatePackage(c context.Context, req *pb.UpdatePackage
 	}
 
 	pD := client.PolicyControlSimPackageUpdate{
-		Imsi:      rec.Imsi,
+		Imsi:      hlrRecord.Imsi,
 		PackageId: pId,
 	}
 
 	err = s.pcrf.UpdateSim(pD)
 	if err != nil {
 		return nil, grpc.SqlErrorToGrpc(err, "error updating pcrf")
+	}
+
+	err = s.hlrRepo.UpdatePackage(hlrRecord.Imsi, req.PackageId)
+	if err != nil {
+		return nil, grpc.SqlErrorToGrpc(err, "error updating hlr")
 	}
 
 	return &pb.UpdatePackageResp{}, nil
@@ -203,6 +211,7 @@ func (s *HlrRecordServer) Inactivate(c context.Context, req *pb.InactivateReq) (
 
 }
 
+/*
 func (s *HlrRecordServer) Update(c context.Context, req *pb.UpdateRecordReq) (*pb.UpdateRecordResp, error) {
 	rec, err := s.hlrRepo.GetByImsi(req.Imsi)
 	if err != nil {
@@ -216,6 +225,7 @@ func (s *HlrRecordServer) Update(c context.Context, req *pb.UpdateRecordReq) (*p
 
 	return &pb.UpdateRecordResp{}, nil
 }
+*/
 
 func (s *HlrRecordServer) UpdateGuti(c context.Context, req *pb.UpdateGutiReq) (*pb.UpdateGutiResp, error) {
 	_, err := s.hlrRepo.GetByImsi(req.Imsi)
@@ -225,7 +235,7 @@ func (s *HlrRecordServer) UpdateGuti(c context.Context, req *pb.UpdateGutiReq) (
 
 	err = s.gutiRepo.Update(&db.Guti{
 		Imsi:            req.Imsi,
-		Plmn_id:         req.Guti.PlmnId,
+		PlmnId:          req.Guti.PlmnId,
 		Mmegi:           req.Guti.Mmegi,
 		Mmec:            req.Guti.Mmec,
 		MTmsi:           req.Guti.Mtmsi,
@@ -248,7 +258,7 @@ func (s *HlrRecordServer) UpdateTai(c context.Context, req *pb.UpdateTaiReq) (*p
 	}
 
 	err = s.hlrRepo.UpdateTai(req.Imsi, db.Tai{
-		PlmId:           req.PlmnId,
+		PlmnId:          req.PlmnId,
 		Tac:             req.Tac,
 		DeviceUpdatedAt: time.Unix(int64(req.UpdatedAt), 0),
 	})

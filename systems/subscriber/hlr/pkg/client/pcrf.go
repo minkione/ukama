@@ -33,7 +33,7 @@ func (P *PolicyControl) AddSim(pcrf PolicyControlSimInfo) error {
 	resp, err := P.R.C.R().
 		SetError(errStatus).
 		SetBody(pcrf).
-		Put(P.R.Url.String() + "v1/pcrf/sims/" + pcrf.Imsi)
+		Put(P.R.Url.String() + "/v1/pcrf/sims/" + pcrf.Imsi)
 
 	if err != nil {
 		logrus.Errorf("Failed to send api request to PCRF. Error %s", err.Error())
@@ -55,7 +55,7 @@ func (P *PolicyControl) UpdateSim(pcrf PolicyControlSimPackageUpdate) error {
 	resp, err := P.R.C.R().
 		SetError(errStatus).
 		SetBody(pcrf).
-		Patch(P.R.Url.String() + "v1/pcrf/sims/" + pcrf.Imsi)
+		Patch(P.R.Url.String() + "/v1/pcrf/sims/" + pcrf.Imsi)
 
 	if err != nil {
 		logrus.Errorf("Failed to send api request to PCRF. Error %s", err.Error())
@@ -76,7 +76,7 @@ func (P *PolicyControl) DeleteSim(imsi string) error {
 
 	resp, err := P.R.C.R().
 		SetError(errStatus).
-		Delete(P.R.Url.String() + "v1/pcrf/sims/" + imsi)
+		Delete(P.R.Url.String() + "/v1/pcrf/sims/" + imsi)
 
 	if err != nil {
 		logrus.Errorf("Failed to send api request to PCRF. Error %s", err.Error())

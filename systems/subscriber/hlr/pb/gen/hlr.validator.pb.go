@@ -85,6 +85,35 @@ func (this *GetRecordResp) Validate() error {
 	return nil
 }
 
+var _regex_ReadReq_Network = regexp.MustCompile(`^([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[1-5][a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})?$`)
+
+func (this *ReadReq) Validate() error {
+	if !_regex_ReadReq_Network.MatchString(this.Network) {
+		return github_com_mwitkow_go_proto_validators.FieldError("Network", fmt.Errorf(`value '%v' must be a string conforming to regex "^([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[1-5][a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})?$"`, this.Network))
+	}
+	if this.Network == "" {
+		return github_com_mwitkow_go_proto_validators.FieldError("Network", fmt.Errorf(`value '%v' must not be an empty string`, this.Network))
+	}
+	if this.Iccid == "" {
+		return github_com_mwitkow_go_proto_validators.FieldError("Iccid", fmt.Errorf(`value '%v' must not be an empty string`, this.Iccid))
+	}
+	if !(len(this.Iccid) > 18) {
+		return github_com_mwitkow_go_proto_validators.FieldError("Iccid", fmt.Errorf(`value '%v' must have a length greater than '18'`, this.Iccid))
+	}
+	if !(len(this.Iccid) < 22) {
+		return github_com_mwitkow_go_proto_validators.FieldError("Iccid", fmt.Errorf(`value '%v' must have a length smaller than '22'`, this.Iccid))
+	}
+	return nil
+}
+func (this *ReadResp) Validate() error {
+	if this.Record != nil {
+		if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(this.Record); err != nil {
+			return github_com_mwitkow_go_proto_validators.FieldError("Record", err)
+		}
+	}
+	return nil
+}
+
 var _regex_ActivateReq_Network = regexp.MustCompile(`^([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[1-5][a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})?$`)
 
 func (this *ActivateReq) Validate() error {
@@ -150,14 +179,14 @@ func (this *UpdatePackageReq) Validate() error {
 	if this.Network == "" {
 		return github_com_mwitkow_go_proto_validators.FieldError("Network", fmt.Errorf(`value '%v' must not be an empty string`, this.Network))
 	}
-	if this.Imsi == "" {
-		return github_com_mwitkow_go_proto_validators.FieldError("Imsi", fmt.Errorf(`value '%v' must not be an empty string`, this.Imsi))
+	if this.Iccid == "" {
+		return github_com_mwitkow_go_proto_validators.FieldError("Iccid", fmt.Errorf(`value '%v' must not be an empty string`, this.Iccid))
 	}
-	if !(len(this.Imsi) > 5) {
-		return github_com_mwitkow_go_proto_validators.FieldError("Imsi", fmt.Errorf(`value '%v' must have a length greater than '5'`, this.Imsi))
+	if !(len(this.Iccid) > 18) {
+		return github_com_mwitkow_go_proto_validators.FieldError("Iccid", fmt.Errorf(`value '%v' must have a length greater than '18'`, this.Iccid))
 	}
-	if !(len(this.Imsi) < 16) {
-		return github_com_mwitkow_go_proto_validators.FieldError("Imsi", fmt.Errorf(`value '%v' must have a length smaller than '16'`, this.Imsi))
+	if !(len(this.Iccid) < 22) {
+		return github_com_mwitkow_go_proto_validators.FieldError("Iccid", fmt.Errorf(`value '%v' must have a length smaller than '22'`, this.Iccid))
 	}
 	if !_regex_UpdatePackageReq_PackageId.MatchString(this.PackageId) {
 		return github_com_mwitkow_go_proto_validators.FieldError("PackageId", fmt.Errorf(`value '%v' must be a string conforming to regex "^([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[1-5][a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})?$"`, this.PackageId))
