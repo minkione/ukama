@@ -1,45 +1,53 @@
-package stubs
-
-import "github.com/ukama/ukama/systems/subscriber/hlr/pkg/client"
-
-package rest
+package main
 
 import (
 	"fmt"
 	"net/http"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/gofrs/uuid"
 	"github.com/loopfz/gadgeto/tonic"
 	"github.com/sirupsen/logrus"
-	"github.com/ukama/ukama/systems/common/config"
 	"github.com/ukama/ukama/systems/common/rest"
-	"github.com/ukama/ukama/systems/subscriber/node-gateway/cmd/version"
-	"github.com/ukama/ukama/systems/subscriber/node-gateway/pkg"
-	"github.com/ukama/ukama/systems/subscriber/node-gateway/pkg/client"
+	"github.com/ukama/ukama/systems/subscriber/hlr/pkg/client"
 
-	pb "github.com/ukama/ukama/systems/subscriber/hlr/pb/gen"
 	"github.com/wI2L/fizz"
 	"github.com/wI2L/fizz/openapi"
 )
 
-type Router struct {
-	f       *fizz.Fizz
-	clients *Clients
-	config  *RouterConfig
+type SimCardInfoReq struct {
+	Iccid string `path:"iccid" validate:"required"`
 }
 
+// TODO: update
+type NetworkValidationReq struct {
+	Network uuid.UUID `path:"network" validate:"required"`
+	Org     uuid.UUID `path:"org" validate:"required"`
+}
+
+type DeleteSimReq struct {
+	Imsi string `path:"imsi" validate:"required"`
+}
+
+type Router struct {
+	f      *fizz.Fizz
+	config *RouterConfig
+}
+
+type HttpEndpoints struct {
+	Timeout time.Duration
+}
 type RouterConfig struct {
-	metricsConfig config.Metrics
-	httpEndpoints *pkg.HttpEndpoints
+	httpEndpoints *HttpEndpoints
 	debugMode     bool
 	serverConf    *rest.HttpConfig
 }
 
-
-func NewRouter(clients *Clients, config *RouterConfig) *Router {
+func NewRouter(config *RouterConfig) *Router {
 	r := &Router{
-		clients: clients,
-		config:  config,
+		config: config,
 	}
 
 	if !config.debugMode {
@@ -50,13 +58,20 @@ func NewRouter(clients *Clients, config *RouterConfig) *Router {
 	return r
 }
 
-func NewRouterConfig(svcConf *pkg.Config) *RouterConfig {
+func NewRouterConfig() *RouterConfig {
+	defaultCors := cors.DefaultConfig()
+	defaultCors.AllowWildcard = true
+	defaultCors.AllowOrigins = []string{"http://localhost", "https://localhost"}
+
 	return &RouterConfig{
-		HttpServices:      &HttpEndpoints{
-			Timeout:     3 * time.Second,
+		httpEndpoints: &HttpEndpoints{
+			Timeout: 3 * time.Second,
 		},
-		serverConf:    &rest.HttpConfig,
-		debugMode:     svcConf.DebugMode,
+		serverConf: &rest.HttpConfig{
+			Port: 8080,
+			Cors: defaultCors,
+		},
+		debugMode: true,
 	}
 }
 
@@ -80,10 +95,10 @@ func (r *Router) init() {
 	n.GET("/:network/orgs/:org", formatDoc("Validate Network", ""), tonic.Handler(r.getValidateNetwork, http.StatusOK))
 
 	p := v1.Group("/pcrf", "PCRF", "Policy control")
-	g.PUT("/sims/:imsi", formatDoc("Add Sim", ""), tonic.Handler(r.putSim, http.StatusOK))
-	g.Delete("/sims/:imsi", formatDoc("Delete Sim", ""), tonic.Handler(r.deleteSim, http.StatusOK))
-	g.PATCH("/sims/:imsi", formatDoc("Update Sim Packege Info", ""), tonic.Handler(r.patchSim, http.StatusOK))
-	
+	p.PUT("/sims/:imsi", formatDoc("Add Sim", ""), tonic.Handler(r.putSim, http.StatusOK))
+	p.DELETE("/sims/:imsi", formatDoc("Delete Sim", ""), tonic.Handler(r.deleteSim, http.StatusOK))
+	p.PATCH("/sims/:imsi", formatDoc("Update Sim Packege Info", ""), tonic.Handler(r.patchSim, http.StatusOK))
+
 }
 
 func formatDoc(summary string, description string) []fizz.OperationOption {
@@ -95,21 +110,21 @@ func formatDoc(summary string, description string) []fizz.OperationOption {
 
 func (r *Router) getSimCard(c *gin.Context, req *SimCardInfoReq) (*client.SimCardInfo, error) {
 	s := client.SimCardInfo{
-	Iccid:	req.Iccid,
-	Imsi: "001010123456789",	
-	Op: []byte("0123456789012345"),
-	Key: []byte("0123456789012345"),
-	Amf: []byte("800"),
-	AlgoType: 1,
-	UeDlAmbrBps: 2000000,
-	UeUlAmbrBps: 2000000,
-	sqn: 1,
-	CsgIdPrsent: false,
-	CsgId: 0,
-	DefaultApnName: "ukama",
+		Iccid:          req.Iccid,
+		Imsi:           "001010123456789",
+		Op:             []byte("0123456789012345"),
+		Key:            []byte("0123456789012345"),
+		Amf:            []byte("800"),
+		AlgoType:       1,
+		UeDlAmbrBps:    2000000,
+		UeUlAmbrBps:    2000000,
+		Sqn:            1,
+		CsgIdPrsent:    false,
+		CsgId:          0,
+		DefaultApnName: "ukama",
 	}
 
-	return &s,nil
+	return &s, nil
 }
 
 func (r *Router) getValidateNetwork(c *gin.Context, req *NetworkValidationReq) error {
@@ -130,4 +145,9 @@ func (r *Router) deleteSim(c *gin.Context, req *DeleteSimReq) error {
 func (r *Router) patchSim(c *gin.Context, req *client.PolicyControlSimPackageUpdate) error {
 	/* No implementaion always return success.*/
 	return nil
+}
+
+func main() {
+	r := NewRouter(NewRouterConfig())
+	r.Run()
 }
