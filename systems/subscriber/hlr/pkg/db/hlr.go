@@ -11,10 +11,10 @@ import (
 type Hlr struct {
 	gorm.Model
 
-	Iccid string `gorm:"index:imsi_unique_idx,unique,where:deleted_at is null;not null;size:22;check:iccid_checker,iccid ~ $$^\\d+$$"`
+	Iccid string `gorm:"index:hlr_unique_idx,unique,where:deleted_at is null;not null;size:22;check:iccid_checker,iccid ~ $$^\\d+$$"`
 	//IMSI might not be unique as same IMSI might be authorized to use multiple network of Org which means multiple enetry for the IMSI in HLR or may be use many to many relattion here.
 	// IMSI Sim ID  (International mobile subscriber identity) https://www.netmanias.com/en/post/blog/5929/lte/lte-user-identifiers-imsi-and-guti
-	Imsi string `gorm:"index:imsi_unique_idx,unique,where:deleted_at is null;not null;size:15;check:imsi_checker,imsi ~ $$^\\d+$$"`
+	Imsi string `gorm:"index:hlr_unique_idx,unique,where:deleted_at is null;not null;size:15;check:imsi_checker,imsi ~ $$^\\d+$$"`
 	// Pre Shared Key. This is optional and configured in operator’s DB in Authentication center and USIM. https://www.3glteinfo.com/lte-security-architecture/
 	Op []byte `gorm:"size:16;"`
 	// Pre Shared Key. Configured in operator’s DB in Authentication center and USIM
@@ -36,9 +36,9 @@ type Hlr struct {
 // Assumption: one IMIS can have only one tracking area
 type Tai struct {
 	gorm.Model
-	ImsiID          uint      `gorm:"uniqueIndex:tai_imsi_unique_idx;not null"`
-	PlmId           string    `gorm:"size:6;uniqueIndex:tai_imsi_unique_idx;not null"` // Public Land Mobile Network Identity (MCC+MNC)
-	Tac             uint32    `gorm:"uniqueIndex:tai_imsi_unique_idx,where:deleted_at is null;not null"`
+	HlrID           uint      `gorm:"uniqueIndex:tai_hlr_unique_idx;not null"`
+	PlmId           string    `gorm:"size:6;uniqueIndex:tai_hlr_unique_idx;not null"` // Public Land Mobile Network Identity (MCC+MNC)
+	Tac             uint32    `gorm:"uniqueIndex:tai_hlr_unique_idx,where:deleted_at is null;not null"`
 	DeviceUpdatedAt time.Time // time when it was updated on the device
 }
 

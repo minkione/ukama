@@ -110,7 +110,7 @@ func (r *hlrRecordRepo) UpdateTai(imsi string, tai Tai) error {
 			return errors.Wrap(err, "error deleting tai")
 		}
 
-		tai.ImsiID = imsiM.ID
+		tai.HlrID = imsiM.ID
 		err = tx.Create(&tai).Error
 		if err != nil {
 			return errors.Wrap(err, "error adding tai")
