@@ -7,7 +7,6 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/gofrs/uuid"
 	"github.com/loopfz/gadgeto/tonic"
 	"github.com/sirupsen/logrus"
 	"github.com/ukama/ukama/systems/common/rest"
@@ -23,8 +22,8 @@ type SimCardInfoReq struct {
 
 // TODO: update
 type NetworkValidationReq struct {
-	Network uuid.UUID `path:"network" validate:"required"`
-	Org     uuid.UUID `path:"org" validate:"required"`
+	Network string `path:"network" validate:"required,uuid4"`
+	Org     string `path:"org" validate:"required,uuid4"`
 }
 
 type DeleteSimReq struct {
@@ -68,7 +67,7 @@ func NewRouterConfig() *RouterConfig {
 			Timeout: 3 * time.Second,
 		},
 		serverConf: &rest.HttpConfig{
-			Port: 8080,
+			Port: 8085,
 			Cors: defaultCors,
 		},
 		debugMode: true,
