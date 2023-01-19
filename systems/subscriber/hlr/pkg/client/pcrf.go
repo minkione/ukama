@@ -7,11 +7,16 @@ import (
 	"github.com/ukama/ukama/systems/common/rest"
 )
 
-type PolicyControl struct {
+type PolicyControl interface {
+	AddSim(pcrf PolicyControlSimInfo) error
+	UpdateSim(pcrf PolicyControlSimPackageUpdate) error
+	DeleteSim(imsi string) error
+}
+type policyControl struct {
 	R *rest.RestClient
 }
 
-func NewPolicyControlClient(url string, debug bool) (*PolicyControl, error) {
+func NewPolicyControlClient(url string, debug bool) (*policyControl, error) {
 
 	f, err := rest.NewRestClient(url, debug)
 	if err != nil {
@@ -19,14 +24,14 @@ func NewPolicyControlClient(url string, debug bool) (*PolicyControl, error) {
 		return nil, err
 	}
 
-	P := &PolicyControl{
+	P := &policyControl{
 		R: f,
 	}
 
 	return P, nil
 }
 
-func (P *PolicyControl) AddSim(pcrf PolicyControlSimInfo) error {
+func (P *policyControl) AddSim(pcrf PolicyControlSimInfo) error {
 
 	errStatus := &ErrorMessage{}
 
@@ -48,7 +53,7 @@ func (P *PolicyControl) AddSim(pcrf PolicyControlSimInfo) error {
 	return nil
 }
 
-func (P *PolicyControl) UpdateSim(pcrf PolicyControlSimPackageUpdate) error {
+func (P *policyControl) UpdateSim(pcrf PolicyControlSimPackageUpdate) error {
 
 	errStatus := &ErrorMessage{}
 
@@ -70,7 +75,7 @@ func (P *PolicyControl) UpdateSim(pcrf PolicyControlSimPackageUpdate) error {
 	return nil
 }
 
-func (P *PolicyControl) DeleteSim(imsi string) error {
+func (P *policyControl) DeleteSim(imsi string) error {
 
 	errStatus := &ErrorMessage{}
 

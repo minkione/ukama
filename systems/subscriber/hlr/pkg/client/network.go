@@ -7,11 +7,15 @@ import (
 	"github.com/ukama/ukama/systems/common/rest"
 )
 
-type Network struct {
+type Network interface {
+	ValidateNetwork(networkId string, orgId string) error
+}
+
+type network struct {
 	R *rest.RestClient
 }
 
-func NewNetworkClient(url string, debug bool) (*Network, error) {
+func NewNetworkClient(url string, debug bool) (*network, error) {
 
 	f, err := rest.NewRestClient(url, debug)
 	if err != nil {
@@ -19,14 +23,14 @@ func NewNetworkClient(url string, debug bool) (*Network, error) {
 		return nil, err
 	}
 
-	N := &Network{
+	N := &network{
 		R: f,
 	}
 
 	return N, nil
 }
 
-func (N *Network) ValidateNetwork(networkId string, orgId string) error {
+func (N *network) ValidateNetwork(networkId string, orgId string) error {
 
 	errStatus := &ErrorMessage{}
 

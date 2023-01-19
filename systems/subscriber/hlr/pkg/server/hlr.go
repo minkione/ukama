@@ -19,9 +19,9 @@ type HlrRecordServer struct {
 	pb.UnimplementedHlrRecordServiceServer
 	hlrRepo  db.HlrRecordRepo
 	gutiRepo db.GutiRepo
-	pcrf     *client.PolicyControl
-	network  *client.Network
-	factory  *client.Factory
+	pcrf     client.PolicyControl
+	network  client.Network
+	factory  client.Factory
 	Org      string
 }
 
@@ -54,27 +54,22 @@ func NewHlrRecordServer(hlrRepo db.HlrRecordRepo, gutiRepo db.GutiRepo, factory 
 }
 
 func (s *HlrRecordServer) Read(c context.Context, req *pb.ReadReq) (*pb.ReadResp, error) {
-	var delHlrRecord *db.Hlr
+	var sub *db.Hlr
 	var err error
 
 	switch req.Id.(type) {
 	case *pb.ReadReq_Imsi:
 
-		delHlrRecord, err = s.hlrRepo.GetByImsi(req.GetImsi())
+		sub, err = s.hlrRepo.GetByImsi(req.GetImsi())
 		if err != nil {
 			return nil, grpc.SqlErrorToGrpc(err, "error getting imsi")
 		}
 
 	case *pb.ReadReq_Iccid:
-		delHlrRecord, err = s.hlrRepo.GetByIccid(req.GetIccid())
+		sub, err = s.hlrRepo.GetByIccid(req.GetIccid())
 		if err != nil {
 			return nil, grpc.SqlErrorToGrpc(err, "error getting iccid")
 		}
-	}
-
-	sub, err := s.hlrRepo.GetByImsi(delHlrRecord.Imsi)
-	if err != nil {
-		return nil, grpc.SqlErrorToGrpc(err, "imsi")
 	}
 
 	resp := &pb.ReadResp{Record: &pb.Record{
@@ -95,7 +90,7 @@ func (s *HlrRecordServer) Read(c context.Context, req *pb.ReadReq) (*pb.ReadResp
 		PackageId:   sub.PackageId,
 	}}
 
-	logrus.Infof("Subscriber %s is having %+v", delHlrRecord.Imsi, resp)
+	logrus.Infof("Subscriber is having %+v", resp)
 	return resp, nil
 }
 

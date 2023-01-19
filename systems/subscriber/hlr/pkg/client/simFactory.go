@@ -8,7 +8,11 @@ import (
 	"github.com/ukama/ukama/systems/common/rest"
 )
 
-type Factory struct {
+type Factory interface {
+	ReadSimCardInfo(Iccid string) (*SimCardInfo, error)
+}
+
+type factory struct {
 	R *rest.RestClient
 }
 
@@ -16,7 +20,7 @@ type ErrorMessage struct {
 	Message string `json:"error"`
 }
 
-func NewFactoryClient(url string, debug bool) (*Factory, error) {
+func NewFactoryClient(url string, debug bool) (*factory, error) {
 
 	f, err := rest.NewRestClient(url, debug)
 	if err != nil {
@@ -24,14 +28,14 @@ func NewFactoryClient(url string, debug bool) (*Factory, error) {
 		return nil, err
 	}
 
-	F := &Factory{
+	F := &factory{
 		R: f,
 	}
 
 	return F, nil
 }
 
-func (f *Factory) ReadSimCardInfo(Iccid string) (*SimCardInfo, error) {
+func (f *factory) ReadSimCardInfo(Iccid string) (*SimCardInfo, error) {
 
 	card := SimCardInfo{}
 	errStatus := &ErrorMessage{}
