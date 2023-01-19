@@ -53,13 +53,31 @@ func NewHlrRecordServer(hlrRepo db.HlrRecordRepo, gutiRepo db.GutiRepo, factory 
 	return &hlr, nil
 }
 
-func (s *HlrRecordServer) Get(c context.Context, r *pb.GetRecordReq) (*pb.GetRecordResp, error) {
-	sub, err := s.hlrRepo.GetByImsi(r.Imsi)
+func (s *HlrRecordServer) Read(c context.Context, req *pb.ReadReq) (*pb.ReadResp, error) {
+	var delHlrRecord *db.Hlr
+	var err error
+
+	switch req.Id.(type) {
+	case *pb.ReadReq_Imsi:
+
+		delHlrRecord, err = s.hlrRepo.GetByImsi(req.GetImsi())
+		if err != nil {
+			return nil, grpc.SqlErrorToGrpc(err, "error getting imsi")
+		}
+
+	case *pb.ReadReq_Iccid:
+		delHlrRecord, err = s.hlrRepo.GetByIccid(req.GetIccid())
+		if err != nil {
+			return nil, grpc.SqlErrorToGrpc(err, "error getting iccid")
+		}
+	}
+
+	sub, err := s.hlrRepo.GetByImsi(delHlrRecord.Imsi)
 	if err != nil {
 		return nil, grpc.SqlErrorToGrpc(err, "imsi")
 	}
 
-	resp := &pb.GetRecordResp{Record: &pb.Record{
+	resp := &pb.ReadResp{Record: &pb.Record{
 		Imsi:  sub.Imsi,
 		Iccid: sub.Iccid,
 		Key:   sub.Key,
@@ -76,7 +94,8 @@ func (s *HlrRecordServer) Get(c context.Context, r *pb.GetRecordReq) (*pb.GetRec
 		UeUlAmbrBps: sub.UeDlAmbrBps,
 		PackageId:   sub.PackageId,
 	}}
-	logrus.Infof("Subscriber %s is having %+v", r.Imsi, resp)
+
+	logrus.Infof("Subscriber %s is having %+v", delHlrRecord.Imsi, resp)
 	return resp, nil
 }
 

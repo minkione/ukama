@@ -37,29 +37,6 @@ func (_m *HlrRecordServiceServer) Activate(_a0 context.Context, _a1 *gen.Activat
 	return r0, r1
 }
 
-// Get provides a mock function with given fields: _a0, _a1
-func (_m *HlrRecordServiceServer) Get(_a0 context.Context, _a1 *gen.GetRecordReq) (*gen.GetRecordResp, error) {
-	ret := _m.Called(_a0, _a1)
-
-	var r0 *gen.GetRecordResp
-	if rf, ok := ret.Get(0).(func(context.Context, *gen.GetRecordReq) *gen.GetRecordResp); ok {
-		r0 = rf(_a0, _a1)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*gen.GetRecordResp)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, *gen.GetRecordReq) error); ok {
-		r1 = rf(_a0, _a1)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // Inactivate provides a mock function with given fields: _a0, _a1
 func (_m *HlrRecordServiceServer) Inactivate(_a0 context.Context, _a1 *gen.InactivateReq) (*gen.InactivateResp, error) {
 	ret := _m.Called(_a0, _a1)
@@ -83,8 +60,8 @@ func (_m *HlrRecordServiceServer) Inactivate(_a0 context.Context, _a1 *gen.Inact
 	return r0, r1
 }
 
-// ReadIccid provides a mock function with given fields: _a0, _a1
-func (_m *HlrRecordServiceServer) ReadIccid(_a0 context.Context, _a1 *gen.ReadReq) (*gen.ReadResp, error) {
+// Read provides a mock function with given fields: _a0, _a1
+func (_m *HlrRecordServiceServer) Read(_a0 context.Context, _a1 *gen.ReadReq) (*gen.ReadResp, error) {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 *gen.ReadResp

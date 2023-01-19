@@ -15,12 +15,13 @@ service HlrRecordService {
     rpc Activate(ActivateReq) returns (ActivateResp);
     rpc Inactivate(InactivateReq) returns (InactivateResp);
     rpc UpdatePackage(UpdatePackageReq) returns (UpdatePackageResp); 
-    rpc ReadIccid(ReadReq) returns (ReadResp);
+   
     
     /* Node Gateway */
-    rpc Get(GetRecordReq) returns (GetRecordResp);
     rpc UpdateGuti (UpdateGutiReq) returns (UpdateGutiResp);
     rpc UpdateTai (UpdateTaiReq) returns (UpdateTaiResp);
+
+    rpc Read(ReadReq) returns (ReadResp);
 }
 
 
@@ -45,20 +46,11 @@ message Apn {
     string Name = 1;
 }
 
-message GetRecordReq {
-    string network = 1[(validator.field) = {uuid_ver: 0, string_not_empty: true}, json_name="network"]; // Mesh will add this info based on connection.
-    string Imsi = 2 [(validator.field) = { string_not_empty: true,  length_gt: 5, length_lt: 16}];
-}
-
-
-message GetRecordResp{
-    Record Record = 1;
-}
-
-
 message ReadReq {
-    string network = 1[(validator.field) = {uuid_ver: 0, string_not_empty: true}, json_name="network"];
-    string Iccid = 2 [(validator.field) = { string_not_empty: true,  length_gt: 18, length_lt: 22}, json_name="iccid"];
+    oneof id {
+        string Imsi = 1 [(validator.field) = { string_not_empty: true,  length_gt: 5, length_lt: 16}];
+        string Iccid = 2 [(validator.field) = {string_not_empty: true, length_gt: 18, length_lt: 22}];
+    }
 }
 
 message ReadResp {
@@ -95,37 +87,6 @@ message UpdatePackageReq {
 message UpdatePackageResp {
 
 }
-
-message AddRecordReq {
-    string network = 1[(validator.field) = {uuid_ver: 0, string_not_empty: true}, json_name="network"];
-    Record Record = 2 [(validator.field) = { string_not_empty: true,  length_gt: 5, length_lt: 16}];
-}
-
-message AddRecordResp {
-
-}
-
-message UpdateRecordReq{
-    string Imsi=1 [(validator.field) = { string_not_empty: true,  length_gt: 5, length_lt: 16}];
-    Record Record = 2  [(validator.field) = { msg_exists: true }]; // imsi field cannot be updated
-}
-
-message UpdateRecordResp{
-
-}
-
-message DeleteRecordReq{
-    
-    oneof id_oneof {
-        string Imsi = 1 [(validator.field) = { string_not_empty: true,  length_gt: 5, length_lt: 16}];
-        string Iccid = 2 [(validator.field) = {string_not_empty: true}];
-    }
-}
-
-message DeleteRecordResp {
-
-}
-
 
 message UpdateGutiReq{
     string Imsi = 1 [(validator.field) = { string_not_empty: true,  length_gt: 5, length_lt: 16}];

@@ -46,36 +46,6 @@ func (_m *HlrRecordServiceClient) Activate(ctx context.Context, in *gen.Activate
 	return r0, r1
 }
 
-// Get provides a mock function with given fields: ctx, in, opts
-func (_m *HlrRecordServiceClient) Get(ctx context.Context, in *gen.GetRecordReq, opts ...grpc.CallOption) (*gen.GetRecordResp, error) {
-	_va := make([]interface{}, len(opts))
-	for _i := range opts {
-		_va[_i] = opts[_i]
-	}
-	var _ca []interface{}
-	_ca = append(_ca, ctx, in)
-	_ca = append(_ca, _va...)
-	ret := _m.Called(_ca...)
-
-	var r0 *gen.GetRecordResp
-	if rf, ok := ret.Get(0).(func(context.Context, *gen.GetRecordReq, ...grpc.CallOption) *gen.GetRecordResp); ok {
-		r0 = rf(ctx, in, opts...)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*gen.GetRecordResp)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, *gen.GetRecordReq, ...grpc.CallOption) error); ok {
-		r1 = rf(ctx, in, opts...)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // Inactivate provides a mock function with given fields: ctx, in, opts
 func (_m *HlrRecordServiceClient) Inactivate(ctx context.Context, in *gen.InactivateReq, opts ...grpc.CallOption) (*gen.InactivateResp, error) {
 	_va := make([]interface{}, len(opts))
@@ -106,8 +76,8 @@ func (_m *HlrRecordServiceClient) Inactivate(ctx context.Context, in *gen.Inacti
 	return r0, r1
 }
 
-// ReadIccid provides a mock function with given fields: ctx, in, opts
-func (_m *HlrRecordServiceClient) ReadIccid(ctx context.Context, in *gen.ReadReq, opts ...grpc.CallOption) (*gen.ReadResp, error) {
+// Read provides a mock function with given fields: ctx, in, opts
+func (_m *HlrRecordServiceClient) Read(ctx context.Context, in *gen.ReadReq, opts ...grpc.CallOption) (*gen.ReadResp, error) {
 	_va := make([]interface{}, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
