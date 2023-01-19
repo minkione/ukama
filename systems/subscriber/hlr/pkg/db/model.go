@@ -3,7 +3,7 @@ package db
 import (
 	"time"
 
-	"github.com/google/uuid"
+	uuid "github.com/satori/go.uuid"
 	"gorm.io/gorm"
 )
 
@@ -11,10 +11,11 @@ import (
 type Hlr struct {
 	gorm.Model
 
-	Iccid string `gorm:"index:hlr_unique_idx,unique,where:deleted_at is null;not null;size:22;check:iccid_checker,iccid ~ $$^\\d+$$"`
+	Iccid string `gorm:"index:hlr_iccid_idx,unique,where:deleted_at is null;not null;size:22;check:iccid_checker,iccid ~ $$^\\d+$$"`
 	//IMSI might not be unique as same IMSI might be authorized to use multiple network of Org which means multiple enetry for the IMSI in HLR or may be use many to many relattion here.
+	// For Now we are considering that use case where each imsi could only belong to one network.
 	// IMSI Sim ID  (International mobile subscriber identity) https://www.netmanias.com/en/post/blog/5929/lte/lte-user-identifiers-imsi-and-guti
-	Imsi string `gorm:"index:hlr_unique_idx,unique,where:deleted_at is null;not null;size:15;check:hlr_checker,imsi ~ $$^\\d+$$"`
+	Imsi string `gorm:"index:hlr_imsi_idx,unique,where:deleted_at is null;not null;size:15;check:hlr_checker,imsi ~ $$^\\d+$$"`
 	// Pre Shared Key. This is optional and configured in operator’s DB in Authentication center and USIM. https://www.3glteinfo.com/lte-security-architecture/
 	Op []byte `gorm:"size:16;"`
 	// Pre Shared Key. Configured in operator’s DB in Authentication center and USIM

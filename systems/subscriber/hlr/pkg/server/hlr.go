@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/google/uuid"
+	uuid "github.com/satori/go.uuid"
 	"github.com/sirupsen/logrus"
 	"github.com/ukama/ukama/systems/common/grpc"
 	pb "github.com/ukama/ukama/systems/subscriber/hlr/pb/gen"
@@ -95,12 +95,12 @@ func (s *HlrRecordServer) Activate(c context.Context, req *pb.ActivateReq) (*pb.
 	}
 
 	/* Send message to PCRF */
-	nId, err := uuid.Parse(req.Network)
+	nId, err := uuid.FromString(req.Network)
 	if err != nil {
 		logrus.Errorf("NetworkId not valid.")
 	}
 
-	pId, err := uuid.Parse(req.PackageId)
+	pId, err := uuid.FromString(req.PackageId)
 	if err != nil {
 		logrus.Errorf("PackageId not valid.")
 	}
@@ -149,7 +149,7 @@ func (s *HlrRecordServer) UpdatePackage(c context.Context, req *pb.UpdatePackage
 		return nil, grpc.SqlErrorToGrpc(err, "error getting iccid")
 	}
 
-	pId, err := uuid.Parse(req.PackageId)
+	pId, err := uuid.FromString(req.PackageId)
 	if err != nil {
 		logrus.Errorf("PackageId not valid.")
 		return nil, grpc.SqlErrorToGrpc(err, "error invalid package id")
@@ -175,12 +175,7 @@ func (s *HlrRecordServer) UpdatePackage(c context.Context, req *pb.UpdatePackage
 
 func (s *HlrRecordServer) Inactivate(c context.Context, req *pb.InactivateReq) (*pb.InactivateResp, error) {
 	var delHlrRecord *db.Hlr
-
-	/* Validate network in Org */
-	err := s.network.ValidateNetwork(req.Network, s.Org)
-	if err != nil {
-		return nil, grpc.SqlErrorToGrpc(err, "error validating network")
-	}
+	var err error
 
 	switch req.Id.(type) {
 	case *pb.InactivateReq_Imsi:

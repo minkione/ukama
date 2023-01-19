@@ -153,6 +153,20 @@ func (_m *HlrRecordRepo) Update(imsi string, record *db.Hlr) error {
 	return r0
 }
 
+// UpdatePackage provides a mock function with given fields: imsi, packageId
+func (_m *HlrRecordRepo) UpdatePackage(imsi string, packageId string) error {
+	ret := _m.Called(imsi, packageId)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, string) error); ok {
+		r0 = rf(imsi, packageId)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // UpdateTai provides a mock function with given fields: imis, tai
 func (_m *HlrRecordRepo) UpdateTai(imis string, tai db.Tai) error {
 	ret := _m.Called(imis, tai)

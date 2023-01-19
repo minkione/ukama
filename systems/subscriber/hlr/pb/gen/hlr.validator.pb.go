@@ -137,16 +137,7 @@ func (this *ActivateReq) Validate() error {
 func (this *ActivateResp) Validate() error {
 	return nil
 }
-
-var _regex_InactivateReq_Network = regexp.MustCompile(`^([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[1-5][a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})?$`)
-
 func (this *InactivateReq) Validate() error {
-	if !_regex_InactivateReq_Network.MatchString(this.Network) {
-		return github_com_mwitkow_go_proto_validators.FieldError("Network", fmt.Errorf(`value '%v' must be a string conforming to regex "^([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[1-5][a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})?$"`, this.Network))
-	}
-	if this.Network == "" {
-		return github_com_mwitkow_go_proto_validators.FieldError("Network", fmt.Errorf(`value '%v' must not be an empty string`, this.Network))
-	}
 	if oneOfNester, ok := this.GetId().(*InactivateReq_Imsi); ok {
 		if oneOfNester.Imsi == "" {
 			return github_com_mwitkow_go_proto_validators.FieldError("Imsi", fmt.Errorf(`value '%v' must not be an empty string`, oneOfNester.Imsi))
@@ -161,6 +152,12 @@ func (this *InactivateReq) Validate() error {
 	if oneOfNester, ok := this.GetId().(*InactivateReq_Iccid); ok {
 		if oneOfNester.Iccid == "" {
 			return github_com_mwitkow_go_proto_validators.FieldError("Iccid", fmt.Errorf(`value '%v' must not be an empty string`, oneOfNester.Iccid))
+		}
+		if !(len(oneOfNester.Iccid) > 18) {
+			return github_com_mwitkow_go_proto_validators.FieldError("Iccid", fmt.Errorf(`value '%v' must have a length greater than '18'`, oneOfNester.Iccid))
+		}
+		if !(len(oneOfNester.Iccid) < 22) {
+			return github_com_mwitkow_go_proto_validators.FieldError("Iccid", fmt.Errorf(`value '%v' must have a length smaller than '22'`, oneOfNester.Iccid))
 		}
 	}
 	return nil

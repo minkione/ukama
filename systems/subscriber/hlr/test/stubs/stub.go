@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"net/http"
 	"time"
 
@@ -107,10 +108,20 @@ func formatDoc(summary string, description string) []fizz.OperationOption {
 	}}
 }
 
+const letterBytes = "0123456789"
+
+func randStringBytes(n int) string {
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+	}
+	return string(b)
+}
+
 func (r *Router) getSimCard(c *gin.Context, req *SimCardInfoReq) (*client.SimCardInfo, error) {
 	s := client.SimCardInfo{
 		Iccid:          req.Iccid,
-		Imsi:           "001010123456789",
+		Imsi:           randStringBytes(15),
 		Op:             []byte("0123456789012345"),
 		Key:            []byte("0123456789012345"),
 		Amf:            []byte("800"),
