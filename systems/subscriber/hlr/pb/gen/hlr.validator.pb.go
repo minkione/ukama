@@ -7,8 +7,8 @@ import (
 	fmt "fmt"
 	math "math"
 	proto "github.com/golang/protobuf/proto"
-	_ "github.com/mwitkow/go-proto-validators"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
+	_ "github.com/mwitkow/go-proto-validators"
 	regexp "regexp"
 	github_com_mwitkow_go_proto_validators "github.com/mwitkow/go-proto-validators"
 )
@@ -191,8 +191,8 @@ func (this *Guti) Validate() error {
 	if this.PlmnId == "" {
 		return github_com_mwitkow_go_proto_validators.FieldError("PlmnId", fmt.Errorf(`value '%v' must not be an empty string`, this.PlmnId))
 	}
-	if !(len(this.PlmnId) > 5) {
-		return github_com_mwitkow_go_proto_validators.FieldError("PlmnId", fmt.Errorf(`value '%v' must have a length greater than '5'`, this.PlmnId))
+	if !(len(this.PlmnId) > 4) {
+		return github_com_mwitkow_go_proto_validators.FieldError("PlmnId", fmt.Errorf(`value '%v' must have a length greater than '4'`, this.PlmnId))
 	}
 	if !(len(this.PlmnId) < 7) {
 		return github_com_mwitkow_go_proto_validators.FieldError("PlmnId", fmt.Errorf(`value '%v' must have a length smaller than '7'`, this.PlmnId))
@@ -206,8 +206,8 @@ func (this *UpdateTaiReq) Validate() error {
 	if this.PlmnId == "" {
 		return github_com_mwitkow_go_proto_validators.FieldError("PlmnId", fmt.Errorf(`value '%v' must not be an empty string`, this.PlmnId))
 	}
-	if !(len(this.PlmnId) > 5) {
-		return github_com_mwitkow_go_proto_validators.FieldError("PlmnId", fmt.Errorf(`value '%v' must have a length greater than '5'`, this.PlmnId))
+	if !(len(this.PlmnId) > 4) {
+		return github_com_mwitkow_go_proto_validators.FieldError("PlmnId", fmt.Errorf(`value '%v' must have a length greater than '4'`, this.PlmnId))
 	}
 	if !(len(this.PlmnId) < 7) {
 		return github_com_mwitkow_go_proto_validators.FieldError("PlmnId", fmt.Errorf(`value '%v' must have a length smaller than '7'`, this.PlmnId))

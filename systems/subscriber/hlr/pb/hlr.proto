@@ -95,7 +95,7 @@ message UpdateGutiReq{
 }
 
 message Guti{
-    string PlmnId = 1 [json_name="plmn_id", (validator.field) = { string_not_empty: true,  length_gt: 5, length_lt: 7}];
+    string PlmnId = 1 [json_name="plmn_id", (validator.field) = { string_not_empty: true,  length_gt: 4, length_lt: 7}];
     uint32 Mmegi  = 2;
     uint32  Mmec = 3;
     uint32  Mtmsi = 4;
@@ -107,7 +107,7 @@ message UpdateGutiResp{
 
 message UpdateTaiReq{
     string Imsi = 1;
-    string PlmnId = 2 [json_name="plmn_id", (validator.field) = { string_not_empty: true,  length_gt: 5, length_lt: 7}];
+    string PlmnId = 2 [json_name="plmn_id", (validator.field) = { string_not_empty: true,  length_gt: 4, length_lt: 7}];
     uint32 Tac = 3 [(validator.field) = { string_not_empty: true, length_lt: 65537}]; // 16 bit max
     uint32 UpdatedAt = 4 [json_name="updated_at", (validator.field) = { int_gt: 1639144053} ]; // unix timestamp
 }
