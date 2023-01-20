@@ -4,10 +4,11 @@ import (
 	"os"
 
 	"github.com/gofrs/uuid"
+	"github.com/num30/config"
 	"github.com/ukama/ukama/systems/subscriber/hlr/pb/gen"
-
 	"github.com/ukama/ukama/systems/subscriber/hlr/pkg/client"
 	"github.com/ukama/ukama/systems/subscriber/hlr/pkg/server"
+	"gopkg.in/yaml.v3"
 
 	pkg "github.com/ukama/ukama/systems/subscriber/hlr/pkg"
 
@@ -18,7 +19,6 @@ import (
 	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 	ccmd "github.com/ukama/ukama/systems/common/cmd"
-	"github.com/ukama/ukama/systems/common/config"
 	ugrpc "github.com/ukama/ukama/systems/common/grpc"
 	mb "github.com/ukama/ukama/systems/common/msgBusServiceClient"
 	egen "github.com/ukama/ukama/systems/common/pb/gen/events"
@@ -39,8 +39,17 @@ func main() {
 
 // initConfig reads in config file, ENV variables, and flags if set.
 func initConfig() {
+	log.Infof("Initializing config")
 	serviceConfig = pkg.NewConfig(pkg.ServiceName)
-	config.LoadConfig(pkg.ServiceName, serviceConfig)
+	err := config.NewConfReader(pkg.ServiceName).Read(serviceConfig)
+	if err != nil {
+		log.Fatal("Error reading config ", err)
+	} else if pkg.IsDebugMode {
+		b, err := yaml.Marshal(serviceConfig)
+		if err != nil {
+			logrus.Infof("Config:\n%s", string(b))
+		}
+	}
 	pkg.IsDebugMode = serviceConfig.DebugMode
 	logrus.Infof("Config: %+v", serviceConfig)
 }
@@ -102,7 +111,7 @@ func runGrpcServer(gormdb sql.Db) {
 	}
 	nSrv := server.NewHlrEventServer(hlr, guti)
 
-	rpcServer := ugrpc.NewGrpcServer(serviceConfig.Grpc, func(s *grpc.Server) {
+	rpcServer := ugrpc.NewGrpcServer(*serviceConfig.Grpc, func(s *grpc.Server) {
 		gen.RegisterHlrRecordServiceServer(s, hlrServer)
 		egen.RegisterEventNotificationServiceServer(s, nSrv)
 	})

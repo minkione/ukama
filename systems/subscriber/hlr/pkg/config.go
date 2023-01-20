@@ -8,18 +8,18 @@ import (
 
 type Config struct {
 	config.BaseConfig `mapstructure:",squash"`
-	DB                config.Database
-	Grpc              config.Grpc
-	SimTokenKey       string
-	HlrHost           string
-	NetworkHost       string
-	PCRFHost          string
-	FactoryHost       string
-	Org               string
+	DB                *config.Database  `default:"{}"`
+	Grpc              *config.Grpc      `default:"{}"`
 	Timeout           time.Duration     `default:"3s"`
 	MsgClient         *config.MsgClient `default:"{}"`
-	Queue             config.Queue      `default:"{}"`
+	Queue             *config.Queue     `default:"{}"`
 	Service           *config.Service   `default:"{}"`
+	SimTokenKey       string            `default:"11111111111111111111111111111111"`
+	HlrHost           string            `default:"localhost:8085"`
+	NetworkHost       string            `default:"localhost:8085"`
+	PCRFHost          string            `default:"localhost:8085"`
+	FactoryHost       string            `default:"localhost:8080"`
+	Org               string            `default:"880f7c63-eb57-461a-b514-248ce91e9b3e"`
 }
 
 type SimManager struct {
@@ -29,19 +29,14 @@ type SimManager struct {
 
 func NewConfig(name string) *Config {
 	return &Config{
-		DB: config.Database{
+		DB: &config.Database{
 			DbName: ServiceName,
 		},
 
-		Grpc: config.Grpc{
+		Grpc: &config.Grpc{
 			Port: 9090,
 		},
 		SimTokenKey: "11111111111111111111111111111111",
-		HlrHost:     "localhost:8080",
-		NetworkHost: "http://localhost:8085",
-		PCRFHost:    "http://localhost:8085",
-		FactoryHost: "http://localhost:8085",
-		Org:         "880f7c63-eb57-461a-b514-248ce91e9b3e",
 		Service:     config.LoadServiceHostConfig(name),
 		MsgClient: &config.MsgClient{
 			Timeout:        5 * time.Second,
