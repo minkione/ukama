@@ -18,6 +18,8 @@ type Config struct {
 	Org               string
 	Timeout           time.Duration     `default:"3s"`
 	MsgClient         *config.MsgClient `default:"{}"`
+	Queue             config.Queue      `default:"{}"`
+	Service           *config.Service   `default:"{}"`
 }
 
 type SimManager struct {
@@ -25,7 +27,7 @@ type SimManager struct {
 	Name string
 }
 
-func NewConfig() *Config {
+func NewConfig(name string) *Config {
 	return &Config{
 		DB: config.Database{
 			DbName: ServiceName,
@@ -40,6 +42,7 @@ func NewConfig() *Config {
 		PCRFHost:    "http://localhost:8085",
 		FactoryHost: "http://localhost:8085",
 		Org:         "880f7c63-eb57-461a-b514-248ce91e9b3e",
+		Service:     config.LoadServiceHostConfig(name),
 		MsgClient: &config.MsgClient{
 			Timeout:        5 * time.Second,
 			ListenerRoutes: []string{"event.cloud.lookup.organization.create"},
