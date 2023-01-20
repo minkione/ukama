@@ -5,6 +5,7 @@ import (
 	"log"
 	"regexp"
 	"testing"
+	"time"
 
 	int_db "github.com/ukama/ukama/systems/subscriber/hlr/pkg/db"
 
@@ -46,13 +47,19 @@ func (u UkamaDbMock) ExecuteInTransaction2(dbOperation func(tx *gorm.DB) *gorm.D
 	return nil
 }
 
+var guti = int_db.Guti{
+	Imsi:            "012345678912345",
+	PlmnId:          "00101",
+	Mmegi:           101,
+	Mmec:            101,
+	MTmsi:           101,
+	DeviceUpdatedAt: time.Unix(int64(1639144056), 0),
+}
+
 func TestGutiRepo_Update(t *testing.T) {
 
 	t.Run("UpdateGuti", func(t *testing.T) {
 		// Arrange
-		const uuidStr = "51fbba62-c79f-11eb-b8bc-0242ac130003"
-		const orgId = uint(15)
-
 		var db *extsql.DB
 		var err error
 
@@ -100,8 +107,7 @@ func TestGutiRepo_GetImsi(t *testing.T) {
 
 	t.Run("GetImsi", func(t *testing.T) {
 
-		id := ukama.NewVirtualNodeId(ukama.NODE_ID_TYPE_HOMENODE)
-
+	
 		var db *extsql.DB
 		var err error
 
