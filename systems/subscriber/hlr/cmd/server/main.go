@@ -16,7 +16,6 @@ import (
 
 	"github.com/ukama/ukama/systems/subscriber/hlr/pkg/db"
 
-	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 	ccmd "github.com/ukama/ukama/systems/common/cmd"
 	ugrpc "github.com/ukama/ukama/systems/common/grpc"
@@ -47,11 +46,11 @@ func initConfig() {
 	} else if pkg.IsDebugMode {
 		b, err := yaml.Marshal(serviceConfig)
 		if err != nil {
-			logrus.Infof("Config:\n%s", string(b))
+			log.Infof("Config:\n%s", string(b))
 		}
 	}
 	pkg.IsDebugMode = serviceConfig.DebugMode
-	logrus.Infof("Config: %+v", serviceConfig)
+	log.Infof("Config: %+v", serviceConfig)
 }
 
 func initDb() sql.Db {
