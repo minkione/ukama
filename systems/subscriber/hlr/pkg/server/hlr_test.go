@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"testing"
+	"time"
 
 	uuid "github.com/satori/go.uuid"
 	mocks "github.com/ukama/ukama/systems/subscriber/hlr/mocks"
@@ -43,6 +44,21 @@ var sim = client.SimCardInfo{
 	CsgIdPrsent:    false,
 	CsgId:          0,
 	DefaultApnName: "ukama",
+}
+
+var guti = db.Guti{
+	Imsi:            "012345678912345",
+	PlmnId:          "00101",
+	Mmegi:           101,
+	Mmec:            101,
+	MTmsi:           101,
+	DeviceUpdatedAt: time.Unix(int64(1639144056), 0),
+}
+
+var tai = db.Tai{
+	PlmnId:          "00101",
+	Tac:             101,
+	DeviceUpdatedAt: time.Unix(int64(1639144056), 0),
 }
 
 func TestHlr_Read(t *testing.T) {
@@ -250,6 +266,74 @@ func TestHlr_Inactivate(t *testing.T) {
 		assert.NoError(t, err)
 
 		hs, err := s.Inactivate(context.TODO(), &reqPb)
+		assert.NoError(t, err)
+
+		assert.NotNil(t, hs)
+
+		hlrRepo.AssertExpectations(t)
+		gutiRepo.AssertExpectations(t)
+		assert.NoError(t, err)
+	})
+}
+
+func TestHlr_UpdateGuti(t *testing.T) {
+	hlrRepo := &mocks.HlrRecordRepo{}
+	gutiRepo := &mocks.GutiRepo{}
+	factory := &mocks.Factory{}
+	pcrf := &mocks.PolicyControl{}
+	network := &mocks.Network{}
+	t.Run("Update", func(t *testing.T) {
+
+		reqPb := pb.UpdateGutiReq{
+			Imsi: guti.Imsi,
+			Guti: &pb.Guti{
+				PlmnId: guti.PlmnId,
+				Mmegi:  guti.Mmegi,
+				Mmec:   guti.Mmec,
+				Mtmsi:  guti.MTmsi,
+			},
+			UpdatedAt: uint32(guti.DeviceUpdatedAt.Unix()),
+		}
+
+		hlrRepo.On("GetByImsi", reqPb.GetImsi()).Return(&sub, nil).Once()
+		gutiRepo.On("Update", &guti).Return(nil).Once()
+
+		s, err := NewHlrRecordServer(hlrRepo, gutiRepo, factory, network, pcrf, Org)
+		assert.NoError(t, err)
+
+		hs, err := s.UpdateGuti(context.TODO(), &reqPb)
+		assert.NoError(t, err)
+
+		assert.NotNil(t, hs)
+
+		hlrRepo.AssertExpectations(t)
+		gutiRepo.AssertExpectations(t)
+		assert.NoError(t, err)
+	})
+}
+
+func TestHlr_UpdateTai(t *testing.T) {
+	hlrRepo := &mocks.HlrRecordRepo{}
+	gutiRepo := &mocks.GutiRepo{}
+	factory := &mocks.Factory{}
+	pcrf := &mocks.PolicyControl{}
+	network := &mocks.Network{}
+	t.Run("Update", func(t *testing.T) {
+
+		reqPb := pb.UpdateTaiReq{
+			Imsi:      sub.Imsi,
+			PlmnId:    tai.PlmnId,
+			Tac:       tai.Tac,
+			UpdatedAt: uint32(guti.DeviceUpdatedAt.Unix()),
+		}
+
+		hlrRepo.On("GetByImsi", reqPb.GetImsi()).Return(&sub, nil).Once()
+		hlrRepo.On("UpdateTai", sub.Imsi, tai).Return(nil).Once()
+
+		s, err := NewHlrRecordServer(hlrRepo, gutiRepo, factory, network, pcrf, Org)
+		assert.NoError(t, err)
+
+		hs, err := s.UpdateTai(context.TODO(), &reqPb)
 		assert.NoError(t, err)
 
 		assert.NotNil(t, hs)

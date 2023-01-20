@@ -12,8 +12,8 @@ type GutiRepo struct {
 	mock.Mock
 }
 
-// GetImis provides a mock function with given fields: guti
-func (_m *GutiRepo) GetImis(guti string) (string, error) {
+// GetImsi provides a mock function with given fields: guti
+func (_m *GutiRepo) GetImsi(guti string) (string, error) {
 	ret := _m.Called(guti)
 
 	var r0 string

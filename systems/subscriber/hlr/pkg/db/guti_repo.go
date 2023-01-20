@@ -13,7 +13,7 @@ const GutiNotUpdatedErr = "more recent guti for imsi exist"
 
 type GutiRepo interface {
 	Update(guti *Guti) error
-	GetImis(guti string) (string, error)
+	GetImsi(guti string) (string, error)
 }
 
 type gutiRepo struct {
@@ -49,7 +49,7 @@ func (g gutiRepo) Update(guti *Guti) error {
 	return err
 }
 
-func (g gutiRepo) GetImis(guti string) (string, error) {
+func (g gutiRepo) GetImsi(guti string) (string, error) {
 	res := Guti{}
 	r := g.db.GetGormDb().First(&res, guti)
 	return res.Imsi, r.Error
