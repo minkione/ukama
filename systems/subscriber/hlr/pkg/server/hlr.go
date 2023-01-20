@@ -2,13 +2,13 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	uuid "github.com/satori/go.uuid"
 	"github.com/sirupsen/logrus"
 	"github.com/ukama/ukama/systems/common/grpc"
 	pb "github.com/ukama/ukama/systems/subscriber/hlr/pb/gen"
-	"github.com/ukama/ukama/systems/subscriber/hlr/pkg"
 	"github.com/ukama/ukama/systems/subscriber/hlr/pkg/client"
 	"github.com/ukama/ukama/systems/subscriber/hlr/pkg/db"
 	"google.golang.org/grpc/codes"
@@ -25,31 +25,16 @@ type HlrRecordServer struct {
 	Org      string
 }
 
-func NewHlrRecordServer(hlrRepo db.HlrRecordRepo, gutiRepo db.GutiRepo, factory string, network string, pcrf string, org string) (*HlrRecordServer, error) {
-
-	var err error
+func NewHlrRecordServer(hlrRepo db.HlrRecordRepo, gutiRepo db.GutiRepo, factory client.Factory, network client.Network, pcrf client.PolicyControl, org string) (*HlrRecordServer, error) {
 
 	hlr := HlrRecordServer{
 		hlrRepo:  hlrRepo,
 		gutiRepo: gutiRepo,
 		Org:      org,
+		factory:  factory,
+		network:  network,
+		pcrf:     pcrf,
 	}
-
-	hlr.factory, err = client.NewFactoryClient(factory, pkg.IsDebugMode)
-	if err != nil {
-		return nil, err
-	}
-
-	hlr.network, err = client.NewNetworkClient(network, pkg.IsDebugMode)
-	if err != nil {
-		return nil, err
-	}
-
-	hlr.pcrf, err = client.NewPolicyControlClient(pcrf, pkg.IsDebugMode)
-	if err != nil {
-		return nil, err
-	}
-
 	return &hlr, nil
 }
 
@@ -99,19 +84,20 @@ func (s *HlrRecordServer) Activate(c context.Context, req *pb.ActivateReq) (*pb.
 	/* Validate network in Org */
 	err := s.network.ValidateNetwork(req.Network, s.Org)
 	if err != nil {
-		return nil, grpc.SqlErrorToGrpc(err, "error validating network")
+		return nil, fmt.Errorf("error validating network")
 	}
 
 	/* Send Request to SIM Factory */
 	sim, err := s.factory.ReadSimCardInfo(req.Iccid)
 	if err != nil {
-		return nil, grpc.SqlErrorToGrpc(err, "error reading iccid from factory")
+		return nil, fmt.Errorf("error reading iccid from factory")
 	}
 
 	/* Send message to PCRF */
 	nId, err := uuid.FromString(req.Network)
 	if err != nil {
 		logrus.Errorf("NetworkId not valid.")
+		return nil, err
 	}
 
 	pId, err := uuid.FromString(req.PackageId)
@@ -163,6 +149,7 @@ func (s *HlrRecordServer) UpdatePackage(c context.Context, req *pb.UpdatePackage
 		return nil, grpc.SqlErrorToGrpc(err, "error getting iccid")
 	}
 
+	/* We assum that packageId is validated by subscriber. */
 	pId, err := uuid.FromString(req.PackageId)
 	if err != nil {
 		logrus.Errorf("PackageId not valid.")

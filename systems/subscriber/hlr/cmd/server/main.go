@@ -6,6 +6,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/ukama/ukama/systems/subscriber/hlr/pb/gen"
 
+	"github.com/ukama/ukama/systems/subscriber/hlr/pkg/client"
 	"github.com/ukama/ukama/systems/subscriber/hlr/pkg/server"
 
 	pkg "github.com/ukama/ukama/systems/subscriber/hlr/pkg"
@@ -77,12 +78,27 @@ func runGrpcServer(gormdb sql.Db) {
 	hlr := db.NewHlrRecordRepo(gormdb)
 	guti := db.NewGutiRepo(gormdb)
 
+	factory, err := client.NewFactoryClient(serviceConfig.FactoryHost, pkg.IsDebugMode)
+	if err != nil {
+		log.Fatalf("Fcatory Client initilization failed. Error: %v", err)
+	}
+
+	network, err := client.NewNetworkClient(serviceConfig.NetworkHost, pkg.IsDebugMode)
+	if err != nil {
+		log.Fatalf("Network Client initilization failed. Error: %v", err)
+	}
+
+	pcrf, err := client.NewPolicyControlClient(serviceConfig.PCRFHost, pkg.IsDebugMode)
+	if err != nil {
+		log.Fatalf("PCRF Client initialization failed. Error: %v", err)
+	}
+
 	// hlr service
 	hlrServer, err := server.NewHlrRecordServer(hlr, guti,
-		serviceConfig.FactoryHost, serviceConfig.NetworkHost, serviceConfig.PCRFHost, serviceConfig.Org)
+		factory, network, pcrf, serviceConfig.Org)
 
 	if err != nil {
-		log.Fatalf("hlr server initilization failed. Error: %v", err)
+		log.Fatalf("hlr server initialization failed. Error: %v", err)
 	}
 	nSrv := server.NewHlrEventServer(hlr, guti)
 
