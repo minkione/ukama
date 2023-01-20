@@ -1,6 +1,8 @@
 package pkg
 
 import (
+	"time"
+
 	"github.com/ukama/ukama/systems/common/config"
 )
 
@@ -14,6 +16,8 @@ type Config struct {
 	PCRFHost          string
 	FactoryHost       string
 	Org               string
+	Timeout           time.Duration     `default:"3s"`
+	MsgClient         *config.MsgClient `default:"{}"`
 }
 
 type SimManager struct {
@@ -24,12 +28,7 @@ type SimManager struct {
 func NewConfig() *Config {
 	return &Config{
 		DB: config.Database{
-			Host:       "localhost",
-			Password:   "Pass2020!",
-			DbName:     ServiceName,
-			Username:   "postgres",
-			Port:       5432,
-			SslEnabled: false,
+			DbName: ServiceName,
 		},
 
 		Grpc: config.Grpc{
@@ -41,5 +40,9 @@ func NewConfig() *Config {
 		PCRFHost:    "http://localhost:8085",
 		FactoryHost: "http://localhost:8085",
 		Org:         "880f7c63-eb57-461a-b514-248ce91e9b3e",
+		MsgClient: &config.MsgClient{
+			Timeout:        5 * time.Second,
+			ListenerRoutes: []string{"event.cloud.lookup.organization.create"},
+		},
 	}
 }
