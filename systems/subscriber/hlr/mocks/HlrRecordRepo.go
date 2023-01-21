@@ -14,13 +14,13 @@ type HlrRecordRepo struct {
 	mock.Mock
 }
 
-// Add provides a mock function with given fields: network, record
-func (_m *HlrRecordRepo) Add(network string, record *db.Hlr) error {
-	ret := _m.Called(network, record)
+// Add provides a mock function with given fields: record
+func (_m *HlrRecordRepo) Add(record *db.Hlr) error {
+	ret := _m.Called(record)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, *db.Hlr) error); ok {
-		r0 = rf(network, record)
+	if rf, ok := ret.Get(0).(func(*db.Hlr) error); ok {
+		r0 = rf(record)
 	} else {
 		r0 = ret.Error(0)
 	}

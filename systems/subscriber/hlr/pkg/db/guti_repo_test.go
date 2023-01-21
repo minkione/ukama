@@ -45,9 +45,9 @@ func (u UkamaDbMock) ExecuteInTransaction2(dbOperation func(tx *gorm.DB) *gorm.D
 	return nil
 }
 
-var imsi = "012345678912345"
-var guti = int_db.Guti{
-	Imsi:            imsi,
+var Imsi = "012345678912345"
+var Guti = int_db.Guti{
+	Imsi:            Imsi,
 	PlmnId:          "00101",
 	Mmegi:           101,
 	Mmec:            101,
@@ -69,15 +69,15 @@ func TestGutiRepo_Update(t *testing.T) {
 
 		mock.ExpectBegin()
 		mock.ExpectQuery(`^SELECT.*gutis.*`).
-			WithArgs(imsi, sqlmock.AnyArg()).
+			WithArgs(Imsi, sqlmock.AnyArg()).
 			WillReturnRows(rows)
 
 		mock.ExpectExec(regexp.QuoteMeta("DELETE")).
-			WithArgs(imsi, sqlmock.AnyArg()).
+			WithArgs(Imsi, sqlmock.AnyArg()).
 			WillReturnResult(sqlmock.NewResult(0, 0))
 
 		mock.ExpectExec(regexp.QuoteMeta(`INSERT`)).
-			WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), guti.Imsi, guti.PlmnId, guti.Mmegi, guti.Mmec, guti.MTmsi).
+			WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), Guti.Imsi, Guti.PlmnId, Guti.Mmegi, Guti.Mmec, Guti.MTmsi).
 			WillReturnResult(sqlmock.NewResult(1, 1))
 
 		mock.ExpectCommit()
@@ -98,7 +98,7 @@ func TestGutiRepo_Update(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Act
-		err = r.Update(&guti)
+		err = r.Update(&Guti)
 
 		// Assert
 		assert.NoError(t, err)
@@ -120,10 +120,10 @@ func TestGutiRepo_GetImsi(t *testing.T) {
 		assert.NoError(t, err)
 		now := time.Now()
 		rows := sqlmock.NewRows([]string{"created_at", "device_updated_at", "imsi", "plmn_id", "mmegi", "mmec", "m_tmsi"}).
-			AddRow(now, now, guti.Imsi, guti.PlmnId, guti.Mmegi, guti.Mmec, guti.MTmsi)
+			AddRow(now, now, Guti.Imsi, Guti.PlmnId, Guti.Mmegi, Guti.Mmec, Guti.MTmsi)
 
 		mock.ExpectQuery(`^SELECT.*gutis.*`).
-			WithArgs(imsi).
+			WithArgs(Imsi).
 			WillReturnRows(rows)
 		dialector := postgres.New(postgres.Config{
 			DSN:                  "sqlmock_db_0",
@@ -141,7 +141,7 @@ func TestGutiRepo_GetImsi(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Act
-		i, err := r.GetImsi(imsi)
+		i, err := r.GetImsi(Imsi)
 
 		// Assert
 		assert.NoError(t, err)
@@ -150,7 +150,7 @@ func TestGutiRepo_GetImsi(t *testing.T) {
 		assert.NoError(t, err)
 
 		if assert.NotNil(t, i) {
-			assert.EqualValues(t, i, imsi)
+			assert.EqualValues(t, i, Imsi)
 		}
 
 	})

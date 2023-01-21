@@ -135,7 +135,7 @@ func (s *HlrRecordServer) Activate(c context.Context, req *pb.ActivateReq) (*pb.
 		PackageId:      req.PackageId,
 	}
 
-	err = s.hlrRepo.Add(req.Network, hlr)
+	err = s.hlrRepo.Add(hlr)
 	if err != nil {
 		return nil, grpc.SqlErrorToGrpc(err, "error updating hlr")
 	}

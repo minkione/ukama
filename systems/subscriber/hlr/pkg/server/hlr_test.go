@@ -202,7 +202,7 @@ func TestHlr_Activate(t *testing.T) {
 		network.On("ValidateNetwork", reqPb.Network, Org).Return(nil).Once()
 		factory.On("ReadSimCardInfo", reqPb.Iccid).Return(&sim, nil).Once()
 		pcrf.On("AddSim", pReq).Return(nil).Once()
-		hlrRepo.On("Add", reqPb.Network, hlr).Return(nil).Once()
+		hlrRepo.On("Add", hlr).Return(nil).Once()
 
 		s, err := NewHlrRecordServer(hlrRepo, gutiRepo, factory, network, pcrf, Org)
 		assert.NoError(t, err)

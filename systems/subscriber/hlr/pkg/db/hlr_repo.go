@@ -14,7 +14,7 @@ const TaiNotUpdatedErr = "more recent tai for imsi exist"
 
 // declare interface so that we can mock it
 type HlrRecordRepo interface {
-	Add(network string, record *Hlr) error
+	Add(record *Hlr) error
 	Get(id int) (*Hlr, error)
 	GetByImsi(imsi string) (*Hlr, error)
 	GetByIccid(iccid string) (*Hlr, error)
@@ -35,7 +35,7 @@ func NewHlrRecordRepo(db sql.Db) *hlrRecordRepo {
 	}
 }
 
-func (r *hlrRecordRepo) Add(network string, rec *Hlr) error {
+func (r *hlrRecordRepo) Add(rec *Hlr) error {
 	d := r.db.GetGormDb().Create(rec)
 	return d.Error
 }
