@@ -55,7 +55,7 @@ func initConfig() {
 
 func initDb() sql.Db {
 	log.Infof("Initializing Database")
-	d := sql.NewDb(serviceConfig.DB, serviceConfig.DebugMode)
+	d := sql.NewDb(serviceConfig.DB, true)
 	err := d.Init(&db.Hlr{}, &db.Guti{}, &db.Tai{})
 	if err != nil {
 		log.Fatalf("Database initialization failed. Error: %v", err)
@@ -115,7 +115,9 @@ func runGrpcServer(gormdb sql.Db) {
 		egen.RegisterEventNotificationServiceServer(s, nSrv)
 	})
 
-	go msgBusListener(mbClient)
+	if pkg.IsMessageBus {
+		go msgBusListener(mbClient)
+	}
 
 	rpcServer.StartServer()
 

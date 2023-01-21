@@ -15,10 +15,10 @@ type Config struct {
 	Queue             *config.Queue     `default:"{}"`
 	Service           *config.Service   `default:"{}"`
 	SimTokenKey       string            `default:"11111111111111111111111111111111"`
-	HlrHost           string            `default:"localhost:8085"`
-	NetworkHost       string            `default:"localhost:8085"`
-	PCRFHost          string            `default:"localhost:8085"`
-	FactoryHost       string            `default:"localhost:8080"`
+	HlrHost           string            `default:"localhost"`
+	NetworkHost       string            `default:"http://localhost:8085"`
+	PCRFHost          string            `default:"http://localhost:8085"`
+	FactoryHost       string            `default:"http://localhost:8085"`
 	Org               string            `default:"880f7c63-eb57-461a-b514-248ce91e9b3e"`
 }
 

@@ -9,8 +9,6 @@ import (
 
 	int_db "github.com/ukama/ukama/systems/subscriber/hlr/pkg/db"
 
-	"github.com/ukama/ukama/systems/common/ukama"
-
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/postgres"
@@ -47,8 +45,9 @@ func (u UkamaDbMock) ExecuteInTransaction2(dbOperation func(tx *gorm.DB) *gorm.D
 	return nil
 }
 
+var imsi = "012345678912345"
 var guti = int_db.Guti{
-	Imsi:            "012345678912345",
+	Imsi:            imsi,
 	PlmnId:          "00101",
 	Mmegi:           101,
 	Mmec:            101,
@@ -66,58 +65,21 @@ func TestGutiRepo_Update(t *testing.T) {
 		db, mock, err := sqlmock.New() // mock sql.DB
 		assert.NoError(t, err)
 
-		id := ukama.NewVirtualNodeId(ukama.NODE_ID_TYPE_HOMENODE)
-
-		rows := sqlmock.NewRows([]string{"node_id", "orgid"}).
-			AddRow(uuidStr, orgId)
-
-		mock.ExpectQuery(`^SELECT.*nodes.*`).
-			WithArgs(id).
-			WillReturnRows(rows)
-
-		dialector := postgres.New(postgres.Config{
-			DSN:                  "sqlmock_db_0",
-			DriverName:           "postgres",
-			Conn:                 db,
-			PreferSimpleProtocol: true,
-		})
-		gdb, err := gorm.Open(dialector, &gorm.Config{})
-		assert.NoError(t, err)
-
-		r := int_db.NewNodeRepo(&UkamaDbMock{
-			GormDb: gdb,
-		})
-
-		assert.NoError(t, err)
-
-		// Act
-		node, err := r.Get(id)
-
-		// Assert
-		assert.NoError(t, err)
-
-		err = mock.ExpectationsWereMet()
-		assert.NoError(t, err)
-		assert.NotNil(t, node)
-	})
-
-}
-
-func TestGutiRepo_GetImsi(t *testing.T) {
-
-	t.Run("GetImsi", func(t *testing.T) {
-
-	
-		var db *extsql.DB
-		var err error
-
-		db, mock, err := sqlmock.New() // mock sql.DB
-		assert.NoError(t, err)
+		rows := sqlmock.NewRows([]string{"created_at", "device_updated_at", "imsi", "plmn_id", "mmegi", "mmec", "m_tmsi"})
 
 		mock.ExpectBegin()
+		mock.ExpectQuery(`^SELECT.*gutis.*`).
+			WithArgs(imsi, sqlmock.AnyArg()).
+			WillReturnRows(rows)
 
-		mock.ExpectExec(regexp.QuoteMeta("DELETE")).WithArgs(id).
+		mock.ExpectExec(regexp.QuoteMeta("DELETE")).
+			WithArgs(imsi, sqlmock.AnyArg()).
+			WillReturnResult(sqlmock.NewResult(0, 0))
+
+		mock.ExpectExec(regexp.QuoteMeta(`INSERT`)).
+			WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), guti.Imsi, guti.PlmnId, guti.Mmegi, guti.Mmec, guti.MTmsi).
 			WillReturnResult(sqlmock.NewResult(1, 1))
+
 		mock.ExpectCommit()
 
 		dialector := postgres.New(postgres.Config{
@@ -126,24 +88,71 @@ func TestGutiRepo_GetImsi(t *testing.T) {
 			Conn:                 db,
 			PreferSimpleProtocol: true,
 		})
-
 		gdb, err := gorm.Open(dialector, &gorm.Config{})
 		assert.NoError(t, err)
 
-		r := int_db.NewNodeRepo(&UkamaDbMock{
+		r := int_db.NewGutiRepo(&UkamaDbMock{
 			GormDb: gdb,
 		})
 
 		assert.NoError(t, err)
 
 		// Act
-		err = r.Delete(id)
+		err = r.Update(&guti)
 
 		// Assert
 		assert.NoError(t, err)
 
 		err = mock.ExpectationsWereMet()
 		assert.NoError(t, err)
+
+	})
+
+}
+
+func TestGutiRepo_GetImsi(t *testing.T) {
+
+	t.Run("GetImsi", func(t *testing.T) {
+		var db *extsql.DB
+		var err error
+
+		db, mock, err := sqlmock.New() // mock sql.DB
+		assert.NoError(t, err)
+		now := time.Now()
+		rows := sqlmock.NewRows([]string{"created_at", "device_updated_at", "imsi", "plmn_id", "mmegi", "mmec", "m_tmsi"}).
+			AddRow(now, now, guti.Imsi, guti.PlmnId, guti.Mmegi, guti.Mmec, guti.MTmsi)
+
+		mock.ExpectQuery(`^SELECT.*gutis.*`).
+			WithArgs(imsi).
+			WillReturnRows(rows)
+		dialector := postgres.New(postgres.Config{
+			DSN:                  "sqlmock_db_0",
+			DriverName:           "postgres",
+			Conn:                 db,
+			PreferSimpleProtocol: true,
+		})
+		gdb, err := gorm.Open(dialector, &gorm.Config{})
+		assert.NoError(t, err)
+
+		r := int_db.NewGutiRepo(&UkamaDbMock{
+			GormDb: gdb,
+		})
+
+		assert.NoError(t, err)
+
+		// Act
+		i, err := r.GetImsi(imsi)
+
+		// Assert
+		assert.NoError(t, err)
+
+		err = mock.ExpectationsWereMet()
+		assert.NoError(t, err)
+
+		if assert.NotNil(t, i) {
+			assert.EqualValues(t, i, imsi)
+		}
+
 	})
 
 }

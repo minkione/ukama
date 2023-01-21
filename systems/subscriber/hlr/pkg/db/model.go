@@ -47,9 +47,9 @@ type Tai struct {
 type Guti struct {
 	CreatedAt       time.Time // do not set it directly, it will be overridden
 	DeviceUpdatedAt time.Time // time when it was updated on the device
-	Imsi            string    `gorm:"uniqueIndex;not null;size:15;check:hlr_checker,imsi ~ $$^\\d+$$"`
-	PlmnId          string    `gorm:"uniqueIndex:idx_guti;not null;size:6"`
-	Mmegi           uint32    `gorm:"uniqueIndex:idx_guti;not null"`
-	Mmec            uint32    `gorm:"uniqueIndex:idx_guti;not null"`
-	MTmsi           uint32    `gorm:"uniqueIndex:idx_guti;not null"`
+	Imsi            string    `gorm:"primarykey;uniqueIndex;not null;size:15;check:imsi_checker,imsi ~ $$^\\d+$$"`
+	PlmnId          string    `gorm:"uniqueIndex:guti_hlr_unique_idx;not null;size:6"`
+	Mmegi           uint32    `gorm:"uniqueIndex:guti_hlr_unique_idx;not null"`
+	Mmec            uint32    `gorm:"uniqueIndex:guti_hlr_unique_idx;not null"`
+	MTmsi           uint32    `gorm:"uniqueIndex:guti_hlr_unique_idx;not null"`
 }
