@@ -10,15 +10,6 @@ import (
 
 var networkBaseUrl = "http://localhost:8080"
 
-func NewNetworkCleint() (*network, error) {
-
-	network, err := NewNetworkClient(networkBaseUrl, pkg.IsDebugMode)
-	if err != nil {
-		return nil, err
-	}
-	return network, nil
-}
-
 func TestNetworkClient_ValidateNetwork(t *testing.T) {
 
 	t.Run("ValidateNetwork_Success", func(t *testing.T) {
