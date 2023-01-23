@@ -47,7 +47,7 @@ func (P *policyControl) AddSim(pcrf PolicyControlSimInfo) error {
 
 	if !resp.IsSuccess() {
 		logrus.Tracef("Failed to add sim to PCRF. HTTP resp code %d and Error message is %s", resp.StatusCode(), errStatus.Message)
-		return fmt.Errorf(" failed to add sim to PCRF: %s", errStatus.Message)
+		return fmt.Errorf("failed to add sim to PCRF: %s", errStatus.Message)
 	}
 
 	return nil
@@ -69,7 +69,7 @@ func (P *policyControl) UpdateSim(pcrf PolicyControlSimPackageUpdate) error {
 
 	if !resp.IsSuccess() {
 		logrus.Tracef("Failed to update sim info in PCRF. HTTP resp code %d and Error message is %s", resp.StatusCode(), errStatus.Message)
-		return fmt.Errorf("update failure in PCRF%s", errStatus.Message)
+		return fmt.Errorf("update failure in PCRF: %s", errStatus.Message)
 	}
 
 	return nil
@@ -90,7 +90,7 @@ func (P *policyControl) DeleteSim(imsi string) error {
 
 	if !resp.IsSuccess() {
 		logrus.Tracef("Failed to delete sim from PCRF. HTTP resp code %d and Error message is %s", resp.StatusCode(), errStatus.Message)
-		return fmt.Errorf(" failed to remove sim from PCRF: %s", errStatus.Message)
+		return fmt.Errorf("failed to remove sim from PCRF: %s", errStatus.Message)
 	}
 
 	return nil
