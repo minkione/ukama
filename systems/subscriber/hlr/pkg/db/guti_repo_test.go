@@ -2,7 +2,6 @@ package db_test
 
 import (
 	extsql "database/sql"
-	"log"
 	"regexp"
 	"testing"
 	"time"
@@ -36,13 +35,31 @@ func (u UkamaDbMock) InitDB() error {
 }
 
 func (u UkamaDbMock) ExecuteInTransaction(dbOperation func(tx *gorm.DB) *gorm.DB, nestedFuncs ...func() error) error {
-	log.Fatal("implement me")
+
 	return nil
 }
 
 func (u UkamaDbMock) ExecuteInTransaction2(dbOperation func(tx *gorm.DB) *gorm.DB, nestedFuncs ...func(tx *gorm.DB) error) (err error) {
-	log.Fatal("implement me")
-	return nil
+	return u.GormDb.Transaction(func(tx *gorm.DB) error {
+		d := dbOperation(tx)
+
+		if d.Error != nil {
+			return d.Error
+		}
+
+		if len(nestedFuncs) > 0 {
+			for _, n := range nestedFuncs {
+				if n != nil {
+					nestErr := n(tx)
+					if nestErr != nil {
+						return nestErr
+					}
+				}
+			}
+		}
+
+		return nil
+	})
 }
 
 var Imsi = "012345678912345"
