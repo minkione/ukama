@@ -22,6 +22,8 @@ require (
 
 require (
 	github.com/creasty/defaults v1.6.0 // indirect
+	github.com/jarcoal/httpmock v1.2.0 // indirect
+	github.com/tj/assert v0.0.3 // indirect
 	golang.org/x/net v0.0.0-20220722155237-a158d28d115b // indirect
 )
 

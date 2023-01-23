@@ -20,7 +20,7 @@ func NewPolicyControlClient(url string, debug bool) (*policyControl, error) {
 
 	f, err := rest.NewRestClient(url, debug)
 	if err != nil {
-		logrus.Errorf("Can't conncet to %s url.Error %s", url, err.Error)
+		logrus.Errorf("Can't conncet to %s url.Error %s", url, err.Error())
 		return nil, err
 	}
 
