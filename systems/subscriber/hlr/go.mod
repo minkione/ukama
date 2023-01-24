@@ -4,6 +4,8 @@ go 1.18
 
 replace github.com/ukama/ukama/systems/init/msgClient => ../../init/msgClient
 
+replace github.com/ukama/ukama/systems/subscriber/hlr => ./
+
 require (
 	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.3.0 // indirect

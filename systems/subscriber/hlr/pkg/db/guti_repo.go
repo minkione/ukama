@@ -30,7 +30,7 @@ func (g gutiRepo) Update(guti *Guti) error {
 
 	err := g.db.GetGormDb().Transaction(
 		func(tx *gorm.DB) error {
-			err := tx.Model(&Guti{}).Where("imsi = ? and device_updated_at >= ?", guti.Imsi, guti.DeviceUpdatedAt).Count(&count).Error
+			err := tx.Model(&Guti{}).Where("imsi = ? and device_updated_at > ?", guti.Imsi, guti.DeviceUpdatedAt).Count(&count).Error
 			if err != nil {
 				return errors.Wrap(err, "failed get guti count")
 			}

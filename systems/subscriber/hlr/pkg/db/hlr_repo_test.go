@@ -50,7 +50,7 @@ var sim = client.SimCardInfo{
 var tai = int_db.Tai{
 	PlmnId:          "00101",
 	Tac:             101,
-	DeviceUpdatedAt: time.Unix(int64(1639144056), 0),
+	DeviceUpdatedAt: time.Now(),
 }
 
 func TestHlrRecordRepo_Add(t *testing.T) {

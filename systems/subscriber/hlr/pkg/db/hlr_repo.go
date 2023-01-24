@@ -104,7 +104,7 @@ func (r *hlrRecordRepo) UpdateTai(imsi string, tai Tai) error {
 		}
 
 		var count int64
-		err = tx.Model(&tai).Where("hlr_id = ? and device_updated_at >= ?", imsiM.ID, tai.DeviceUpdatedAt).Count(&count).Error
+		err = tx.Model(&tai).Where("hlr_id = ? and device_updated_at > ?", imsiM.ID, tai.DeviceUpdatedAt).Count(&count).Error
 		if err != nil {
 			return errors.Wrap(err, "error getting tai count")
 		}

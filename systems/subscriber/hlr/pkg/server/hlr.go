@@ -238,6 +238,7 @@ func (s *HlrRecordServer) UpdateGuti(c context.Context, req *pb.UpdateGutiReq) (
 		DeviceUpdatedAt: time.Unix(int64(req.UpdatedAt), 0),
 	})
 	if err != nil {
+		logrus.Errorf("Failed to update GUTI: %s", err.Error())
 		if err.Error() == db.GutiNotUpdatedErr {
 			return nil, status.Errorf(codes.AlreadyExists, err.Error())
 		}

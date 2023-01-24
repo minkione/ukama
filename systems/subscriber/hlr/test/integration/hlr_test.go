@@ -28,7 +28,7 @@ type TestConfig struct {
 var tConfig *TestConfig
 
 var sim = client.SimCardInfo{
-	Iccid:          "0123456789012345678912",
+	Iccid:          "012345678901234567891",
 	Imsi:           "012345678912345",
 	Op:             []byte("0123456789012345"),
 	Key:            []byte("0123456789012345"),
@@ -48,13 +48,13 @@ var guti = db.Guti{
 	Mmegi:           101,
 	Mmec:            101,
 	MTmsi:           101,
-	DeviceUpdatedAt: time.Unix(int64(1639144056), 0),
+	DeviceUpdatedAt: time.Now(),
 }
 
 var tai = db.Tai{
 	PlmnId:          "00101",
 	Tac:             101,
-	DeviceUpdatedAt: time.Unix(int64(1639144056), 0),
+	DeviceUpdatedAt: time.Now(),
 }
 
 func init() {
@@ -79,7 +79,7 @@ func CreateHlrClient() (*grpc.ClientConn, pb.HlrRecordServiceClient, error) {
 	return conn, c, nil
 }
 func Test_FullFlow(t *testing.T) {
-
+	var Imsi string
 	// connect to Grpc service
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
@@ -95,7 +95,7 @@ func Test_FullFlow(t *testing.T) {
 	t.Run("Activate", func(t *testing.T) {
 		_, err := c.Activate(ctx, &pb.ActivateReq{
 			Network:   "40987edb-ebb6-4f84-a27c-99db7c136127",
-			Iccid:     "0123456789012345678912",
+			Iccid:     sim.Iccid,
 			PackageId: "40987edb-ebb6-4f84-a27c-99db7c136300",
 		})
 		assert.NoError(t, err)
@@ -109,12 +109,13 @@ func Test_FullFlow(t *testing.T) {
 		})
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
+		Imsi = resp.Record.Imsi
 	})
 
 	t.Run("ReadByImsi", func(t *testing.T) {
 		resp, err := c.Read(ctx, &pb.ReadReq{
 			Id: &pb.ReadReq_Imsi{
-				Imsi: sim.Imsi,
+				Imsi: Imsi,
 			},
 		})
 		assert.NoError(t, err)
@@ -123,31 +124,31 @@ func Test_FullFlow(t *testing.T) {
 
 	t.Run("UpdateGuti", func(t *testing.T) {
 		_, err := c.UpdateGuti(ctx, &pb.UpdateGutiReq{
-			Imsi: guti.Imsi,
+			Imsi: Imsi,
 			Guti: &pb.Guti{
 				PlmnId: guti.PlmnId,
 				Mmegi:  guti.Mmegi,
 				Mmec:   guti.Mmec,
 				Mtmsi:  guti.MTmsi,
 			},
-			UpdatedAt: uint32(guti.DeviceUpdatedAt.Unix()),
+			UpdatedAt: uint32(time.Now().Unix()),
 		})
 		assert.NoError(t, err)
 	})
 
 	t.Run("UpdateTai", func(t *testing.T) {
 		_, err := c.UpdateTai(ctx, &pb.UpdateTaiReq{
-			Imsi:      sim.Imsi,
+			Imsi:      Imsi,
 			PlmnId:    tai.PlmnId,
 			Tac:       tai.Tac,
-			UpdatedAt: uint32(guti.DeviceUpdatedAt.Unix()),
+			UpdatedAt: uint32(time.Now().Unix()),
 		})
 		assert.NoError(t, err)
 	})
 
 	t.Run("UpdatePackage", func(t *testing.T) {
 		_, err := c.UpdatePackage(ctx, &pb.UpdatePackageReq{
-			Iccid:     "0123456789012345678912",
+			Iccid:     sim.Iccid,
 			PackageId: "40987edb-ebb6-4f84-a27c-99db7c136127",
 		})
 		assert.NoError(t, err)
@@ -156,7 +157,7 @@ func Test_FullFlow(t *testing.T) {
 	t.Run("Inactivate", func(t *testing.T) {
 		_, err := c.Inactivate(ctx, &pb.InactivateReq{
 			Id: &pb.InactivateReq_Iccid{
-				Iccid: "0123456789012345678912",
+				Iccid: sim.Iccid,
 			},
 		})
 		assert.NoError(t, err)
@@ -165,16 +166,27 @@ func Test_FullFlow(t *testing.T) {
 	t.Run("Activate", func(t *testing.T) {
 		_, err := c.Activate(ctx, &pb.ActivateReq{
 			Network:   "40987edb-ebb6-4f84-a27c-99db7c136127",
-			Iccid:     "0123456789012345678912",
+			Iccid:     sim.Iccid,
 			PackageId: "40987edb-ebb6-4f84-a27c-99db7c136300",
 		})
 		assert.NoError(t, err)
 	})
 
+	t.Run("ReadByIccid", func(t *testing.T) {
+		resp, err := c.Read(ctx, &pb.ReadReq{
+			Id: &pb.ReadReq_Iccid{
+				Iccid: sim.Iccid,
+			},
+		})
+		assert.NoError(t, err)
+		assert.NotNil(t, resp)
+		Imsi = resp.Record.Imsi
+	})
+
 	t.Run("InactivateByImsi", func(t *testing.T) {
 		_, err := c.Inactivate(ctx, &pb.InactivateReq{
 			Id: &pb.InactivateReq_Imsi{
-				Imsi: "012345678912345",
+				Imsi: Imsi,
 			},
 		})
 		assert.NoError(t, err)
