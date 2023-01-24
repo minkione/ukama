@@ -8,7 +8,11 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"github.com/sirupsen/logrus"
 	"github.com/ukama/ukama/systems/common/grpc"
+	mb "github.com/ukama/ukama/systems/common/msgBusServiceClient"
+	"github.com/ukama/ukama/systems/common/msgbus"
+	epb "github.com/ukama/ukama/systems/common/pb/gen/events"
 	pb "github.com/ukama/ukama/systems/subscriber/hlr/pb/gen"
+	"github.com/ukama/ukama/systems/subscriber/hlr/pkg"
 	"github.com/ukama/ukama/systems/subscriber/hlr/pkg/client"
 	"github.com/ukama/ukama/systems/subscriber/hlr/pkg/db"
 	"google.golang.org/grpc/codes"
@@ -17,23 +21,27 @@ import (
 
 type HlrRecordServer struct {
 	pb.UnimplementedHlrRecordServiceServer
-	hlrRepo  db.HlrRecordRepo
-	gutiRepo db.GutiRepo
-	pcrf     client.PolicyControl
-	network  client.Network
-	factory  client.Factory
-	Org      string
+	hlrRepo        db.HlrRecordRepo
+	gutiRepo       db.GutiRepo
+	pcrf           client.PolicyControl
+	network        client.Network
+	factory        client.Factory
+	msgbus         mb.MsgBusServiceClient
+	baseRoutingKey msgbus.RoutingKeyBuilder
+	Org            string
 }
 
-func NewHlrRecordServer(hlrRepo db.HlrRecordRepo, gutiRepo db.GutiRepo, factory client.Factory, network client.Network, pcrf client.PolicyControl, org string) (*HlrRecordServer, error) {
+func NewHlrRecordServer(hlrRepo db.HlrRecordRepo, gutiRepo db.GutiRepo, factory client.Factory, network client.Network, pcrf client.PolicyControl, org string, msgBus mb.MsgBusServiceClient) (*HlrRecordServer, error) {
 
 	hlr := HlrRecordServer{
-		hlrRepo:  hlrRepo,
-		gutiRepo: gutiRepo,
-		Org:      org,
-		factory:  factory,
-		network:  network,
-		pcrf:     pcrf,
+		hlrRepo:        hlrRepo,
+		gutiRepo:       gutiRepo,
+		Org:            org,
+		factory:        factory,
+		network:        network,
+		pcrf:           pcrf,
+		msgbus:         msgBus,
+		baseRoutingKey: msgbus.NewRoutingKeyBuilder().SetCloudSource().SetContainer(pkg.ServiceName),
 	}
 	return &hlr, nil
 }
@@ -72,7 +80,7 @@ func (s *HlrRecordServer) Read(c context.Context, req *pb.ReadReq) (*pb.ReadResp
 		Sqn:         sub.Sqn,
 		UeDlAmbrBps: sub.UeDlAmbrBps,
 		UeUlAmbrBps: sub.UeDlAmbrBps,
-		PackageId:   sub.PackageId,
+		PackageId:   sub.PackageId.String(),
 	}}
 
 	logrus.Infof("Subscriber is having %+v", resp)
@@ -132,12 +140,28 @@ func (s *HlrRecordServer) Activate(c context.Context, req *pb.ActivateReq) (*pb.
 		CsgIdPrsent:    sim.CsgIdPrsent,
 		CsgId:          sim.CsgId,
 		DefaultApnName: sim.DefaultApnName,
-		PackageId:      req.PackageId,
+		PackageId:      pId,
+		NetworkID:      nId,
 	}
 
 	err = s.hlrRepo.Add(hlr)
 	if err != nil {
 		return nil, grpc.SqlErrorToGrpc(err, "error updating hlr")
+	}
+
+	/* Create event */
+	e := &epb.ActivatedSubsriber{
+		Imsi:      hlr.Imsi,
+		Iccid:     hlr.Iccid,
+		Network:   hlr.NetworkID.String(),
+		PackageId: hlr.PackageId.String(),
+		Org:       s.Org,
+	}
+
+	route := s.baseRoutingKey.SetAction("create").SetObject("activesubscriber").MustBuild()
+	err = s.msgbus.PublishRequest(route, req)
+	if err != nil {
+		logrus.Errorf("Failed to publish message %+v with key %+v. Errors %s", req, route, err.Error())
 	}
 
 	return &pb.ActivateResp{}, err
@@ -206,22 +230,6 @@ func (s *HlrRecordServer) Inactivate(c context.Context, req *pb.InactivateReq) (
 	return &pb.InactivateResp{}, nil
 
 }
-
-/*
-func (s *HlrRecordServer) Update(c context.Context, req *pb.UpdateRecordReq) (*pb.UpdateRecordResp, error) {
-	rec, err := s.hlrRepo.GetByImsi(req.Imsi)
-	if err != nil {
-		return nil, grpc.SqlErrorToGrpc(err, "error getting imsi")
-	}
-
-	err = s.hlrRepo.Update(req.Imsi, rec)
-	if err != nil {
-		return nil, grpc.SqlErrorToGrpc(err, "error updating hlr")
-	}
-
-	return &pb.UpdateRecordResp{}, nil
-}
-*/
 
 func (s *HlrRecordServer) UpdateGuti(c context.Context, req *pb.UpdateGutiReq) (*pb.UpdateGutiResp, error) {
 	_, err := s.hlrRepo.GetByImsi(req.Imsi)

@@ -31,7 +31,7 @@ type Hlr struct {
 	DefaultApnName string
 	NetworkID      uuid.UUID `gorm:"not null;type:uuid"`
 	Tai            Tai
-	PackageId      string `gorm:"not null;type uuid"`
+	PackageId      uuid.UUID `gorm:"not null;type uuid"`
 }
 
 // Tracking Area Identity (TAI)
