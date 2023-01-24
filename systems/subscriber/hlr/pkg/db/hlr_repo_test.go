@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	uuid "github.com/satori/go.uuid"
 	"github.com/ukama/ukama/systems/subscriber/hlr/pkg/client"
 	int_db "github.com/ukama/ukama/systems/subscriber/hlr/pkg/db"
 
@@ -107,7 +108,7 @@ func TestHlrRecordRepo_Update(t *testing.T) {
 		// Arrange
 		var db *extsql.DB
 		var err error
-		PackageId := "073d8584-5884-4f05-9686-4a11e3a97ea3"
+		PackageId := uuid.NewV4()
 		db, mock, err := sqlmock.New() // mock sql.DB
 		assert.NoError(t, err)
 

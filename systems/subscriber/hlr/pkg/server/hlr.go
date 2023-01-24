@@ -150,18 +150,20 @@ func (s *HlrRecordServer) Activate(c context.Context, req *pb.ActivateReq) (*pb.
 	}
 
 	/* Create event */
-	e := &epb.ActivatedSubsriber{
-		Imsi:      hlr.Imsi,
-		Iccid:     hlr.Iccid,
-		Network:   hlr.NetworkID.String(),
-		PackageId: hlr.PackageId.String(),
-		Org:       s.Org,
+	e := &epb.AsrActivated{
+		Subscriber: &epb.Subscriber{
+			Imsi:    hlr.Imsi,
+			Iccid:   hlr.Iccid,
+			Network: hlr.NetworkID.String(),
+			Package: hlr.PackageId.String(),
+			Org:     s.Org,
+		},
 	}
 
 	route := s.baseRoutingKey.SetAction("create").SetObject("activesubscriber").MustBuild()
-	err = s.msgbus.PublishRequest(route, req)
+	err = s.msgbus.PublishRequest(route, e)
 	if err != nil {
-		logrus.Errorf("Failed to publish message %+v with key %+v. Errors %s", req, route, err.Error())
+		logrus.Errorf("Failed to publish message %+v with key %+v. Errors %s", e, route, err.Error())
 	}
 
 	return &pb.ActivateResp{}, err
@@ -190,9 +192,26 @@ func (s *HlrRecordServer) UpdatePackage(c context.Context, req *pb.UpdatePackage
 		return nil, grpc.SqlErrorToGrpc(err, "error updating pcrf")
 	}
 
-	err = s.hlrRepo.UpdatePackage(hlrRecord.Imsi, req.PackageId)
+	err = s.hlrRepo.UpdatePackage(hlrRecord.Imsi, pId)
 	if err != nil {
 		return nil, grpc.SqlErrorToGrpc(err, "error updating hlr")
+	}
+
+	/* Create event */
+	e := &epb.AsrUpdated{
+		Subscriber: &epb.Subscriber{
+			Imsi:    hlrRecord.Imsi,
+			Iccid:   hlrRecord.Iccid,
+			Network: hlrRecord.NetworkID.String(),
+			Package: req.PackageId,
+			Org:     s.Org,
+		},
+	}
+
+	route := s.baseRoutingKey.SetActionUpdate().SetObject("activesubscriber").MustBuild()
+	err = s.msgbus.PublishRequest(route, e)
+	if err != nil {
+		logrus.Errorf("Failed to publish message %+v with key %+v. Errors %s", e, route, err.Error())
 	}
 
 	return &pb.UpdatePackageResp{}, nil
@@ -225,6 +244,23 @@ func (s *HlrRecordServer) Inactivate(c context.Context, req *pb.InactivateReq) (
 	err = s.hlrRepo.Delete(delHlrRecord.Imsi)
 	if err != nil {
 		return nil, grpc.SqlErrorToGrpc(err, "error updating hlr")
+	}
+
+	/* Create event */
+	e := &epb.AsrInactivated{
+		Subscriber: &epb.Subscriber{
+			Imsi:    delHlrRecord.Imsi,
+			Iccid:   delHlrRecord.Iccid,
+			Network: delHlrRecord.NetworkID.String(),
+			Package: delHlrRecord.PackageId.String(),
+			Org:     s.Org,
+		},
+	}
+
+	route := s.baseRoutingKey.SetActionDelete().SetObject("activesubscriber").MustBuild()
+	err = s.msgbus.PublishRequest(route, e)
+	if err != nil {
+		logrus.Errorf("Failed to publish message %+v with key %+v. Errors %s", e, route, err.Error())
 	}
 
 	return &pb.InactivateResp{}, nil

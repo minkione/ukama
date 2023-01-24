@@ -4,8 +4,6 @@ go 1.18
 
 replace github.com/ukama/ukama/systems/init/msgClient => ../../init/msgClient
 
-replace github.com/ukama/ukama/systems/subscriber/hlr => ./
-
 require (
 	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.3.0 // indirect
@@ -25,7 +23,10 @@ require (
 require (
 	github.com/creasty/defaults v1.6.0 // indirect
 	github.com/jarcoal/httpmock v1.2.0 // indirect
+	github.com/rabbitmq/amqp091-go v1.3.0 // indirect
+	github.com/streadway/amqp v1.0.0 // indirect
 	github.com/tj/assert v0.0.3 // indirect
+	github.com/wagslane/go-rabbitmq v0.8.1 // indirect
 	golang.org/x/net v0.0.0-20220722155237-a158d28d115b // indirect
 )
 

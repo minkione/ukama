@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
+	uuid "github.com/satori/go.uuid"
 	"github.com/ukama/ukama/systems/common/sql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -19,7 +20,7 @@ type HlrRecordRepo interface {
 	GetByImsi(imsi string) (*Hlr, error)
 	GetByIccid(iccid string) (*Hlr, error)
 	Update(imsi string, record *Hlr) error
-	UpdatePackage(imsi string, packageId string) error
+	UpdatePackage(imsi string, packageId uuid.UUID) error
 	DeleteByIccid(iccid string, nestedFunc ...func(*gorm.DB) error) error
 	Delete(imsi string, nestedFunc ...func(*gorm.DB) error) error
 	UpdateTai(imis string, tai Tai) error
@@ -45,7 +46,7 @@ func (r *hlrRecordRepo) Update(imsiToUpdate string, rec *Hlr) error {
 	return d.Error
 }
 
-func (r *hlrRecordRepo) UpdatePackage(imsiToUpdate string, packageId string) error {
+func (r *hlrRecordRepo) UpdatePackage(imsiToUpdate string, packageId uuid.UUID) error {
 	rec := &Hlr{PackageId: packageId}
 	d := r.db.GetGormDb().Where("imsi=?", imsiToUpdate).Updates(rec)
 	return d.Error

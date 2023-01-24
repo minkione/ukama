@@ -6,12 +6,14 @@ import (
 	"time"
 
 	uuid "github.com/satori/go.uuid"
+	cmocks "github.com/ukama/ukama/systems/common/mocks"
 	mocks "github.com/ukama/ukama/systems/subscriber/hlr/mocks"
 	pb "github.com/ukama/ukama/systems/subscriber/hlr/pb/gen"
 	"github.com/ukama/ukama/systems/subscriber/hlr/pkg/client"
 	"github.com/ukama/ukama/systems/subscriber/hlr/pkg/db"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 var Org = "40987edb-ebb6-4f84-a27c-99db7c136127"
@@ -67,6 +69,7 @@ func TestHlr_Read(t *testing.T) {
 	factory := &mocks.Factory{}
 	pcrf := &mocks.PolicyControl{}
 	network := &mocks.Network{}
+	mbC := &cmocks.MsgBusServiceClient{}
 
 	t.Run("ReadByICCID", func(t *testing.T) {
 
@@ -78,7 +81,7 @@ func TestHlr_Read(t *testing.T) {
 
 		hlrRepo.On("GetByIccid", reqPb.GetIccid()).Return(&sub, nil).Once()
 
-		s, err := NewHlrRecordServer(hlrRepo, gutiRepo, factory, network, pcrf, Org)
+		s, err := NewHlrRecordServer(hlrRepo, gutiRepo, factory, network, pcrf, Org, mbC)
 		assert.NoError(t, err)
 
 		hs, err := s.Read(context.TODO(), &reqPb)
@@ -101,7 +104,7 @@ func TestHlr_Read(t *testing.T) {
 
 		hlrRepo.On("GetByImsi", reqPb.GetImsi()).Return(&sub, nil).Once()
 
-		s, err := NewHlrRecordServer(hlrRepo, gutiRepo, factory, network, pcrf, Org)
+		s, err := NewHlrRecordServer(hlrRepo, gutiRepo, factory, network, pcrf, Org, mbC)
 		assert.NoError(t, err)
 
 		hs, err := s.Read(context.TODO(), &reqPb)
@@ -122,6 +125,7 @@ func TestHlr_UpdatePackage(t *testing.T) {
 	factory := &mocks.Factory{}
 	pcrf := &mocks.PolicyControl{}
 	network := &mocks.Network{}
+	mbC := &cmocks.MsgBusServiceClient{}
 
 	reqPb := pb.UpdatePackageReq{
 		Iccid:     "0123456789012345678912",
@@ -138,9 +142,10 @@ func TestHlr_UpdatePackage(t *testing.T) {
 
 	hlrRepo.On("GetByIccid", reqPb.GetIccid()).Return(&sub, nil).Once()
 	pcrf.On("UpdateSim", req).Return(nil).Once()
-	hlrRepo.On("UpdatePackage", sub.Imsi, reqPb.PackageId).Return(nil).Once()
+	hlrRepo.On("UpdatePackage", sub.Imsi, pId).Return(nil).Once()
+	mbC.On("PublishRequest", "event.cloud.hlr.activesubscriber.update", mock.Anything).Return(nil).Once()
 
-	s, err := NewHlrRecordServer(hlrRepo, gutiRepo, factory, network, pcrf, Org)
+	s, err := NewHlrRecordServer(hlrRepo, gutiRepo, factory, network, pcrf, Org, mbC)
 	assert.NoError(t, err)
 
 	hs, err := s.UpdatePackage(context.TODO(), &reqPb)
@@ -160,6 +165,7 @@ func TestHlr_Activate(t *testing.T) {
 	factory := &mocks.Factory{}
 	pcrf := &mocks.PolicyControl{}
 	network := &mocks.Network{}
+	mbC := &cmocks.MsgBusServiceClient{}
 
 	t.Run("ActivateByICCID", func(t *testing.T) {
 
@@ -196,15 +202,17 @@ func TestHlr_Activate(t *testing.T) {
 			CsgIdPrsent:    sim.CsgIdPrsent,
 			CsgId:          sim.CsgId,
 			DefaultApnName: sim.DefaultApnName,
-			PackageId:      reqPb.PackageId,
+			PackageId:      pId,
+			NetworkID:      nId,
 		}
 
 		network.On("ValidateNetwork", reqPb.Network, Org).Return(nil).Once()
 		factory.On("ReadSimCardInfo", reqPb.Iccid).Return(&sim, nil).Once()
 		pcrf.On("AddSim", pReq).Return(nil).Once()
 		hlrRepo.On("Add", hlr).Return(nil).Once()
+		mbC.On("PublishRequest", "event.cloud.hlr.activesubscriber.create", mock.Anything).Return(nil).Once()
 
-		s, err := NewHlrRecordServer(hlrRepo, gutiRepo, factory, network, pcrf, Org)
+		s, err := NewHlrRecordServer(hlrRepo, gutiRepo, factory, network, pcrf, Org, mbC)
 		assert.NoError(t, err)
 
 		hs, err := s.Activate(context.TODO(), &reqPb)
@@ -224,6 +232,7 @@ func TestHlr_Inactivate(t *testing.T) {
 	factory := &mocks.Factory{}
 	pcrf := &mocks.PolicyControl{}
 	network := &mocks.Network{}
+	mbC := &cmocks.MsgBusServiceClient{}
 
 	t.Run("InactivateByICCID", func(t *testing.T) {
 
@@ -236,8 +245,9 @@ func TestHlr_Inactivate(t *testing.T) {
 		hlrRepo.On("GetByIccid", reqPb.GetIccid()).Return(&sub, nil).Once()
 		pcrf.On("DeleteSim", sub.Imsi).Return(nil).Once()
 		hlrRepo.On("Delete", sub.Imsi).Return(nil).Once()
+		mbC.On("PublishRequest", "event.cloud.hlr.activesubscriber.delete", mock.Anything).Return(nil).Once()
 
-		s, err := NewHlrRecordServer(hlrRepo, gutiRepo, factory, network, pcrf, Org)
+		s, err := NewHlrRecordServer(hlrRepo, gutiRepo, factory, network, pcrf, Org, mbC)
 		assert.NoError(t, err)
 
 		hs, err := s.Inactivate(context.TODO(), &reqPb)
@@ -261,8 +271,9 @@ func TestHlr_Inactivate(t *testing.T) {
 		hlrRepo.On("GetByImsi", reqPb.GetImsi()).Return(&sub, nil).Once()
 		pcrf.On("DeleteSim", sub.Imsi).Return(nil).Once()
 		hlrRepo.On("Delete", sub.Imsi).Return(nil).Once()
+		mbC.On("PublishRequest", "event.cloud.hlr.activesubscriber.delete", mock.Anything).Return(nil).Once()
 
-		s, err := NewHlrRecordServer(hlrRepo, gutiRepo, factory, network, pcrf, Org)
+		s, err := NewHlrRecordServer(hlrRepo, gutiRepo, factory, network, pcrf, Org, mbC)
 		assert.NoError(t, err)
 
 		hs, err := s.Inactivate(context.TODO(), &reqPb)
@@ -282,6 +293,7 @@ func TestHlr_UpdateGuti(t *testing.T) {
 	factory := &mocks.Factory{}
 	pcrf := &mocks.PolicyControl{}
 	network := &mocks.Network{}
+	mbC := &cmocks.MsgBusServiceClient{}
 	t.Run("Update", func(t *testing.T) {
 
 		reqPb := pb.UpdateGutiReq{
@@ -298,7 +310,7 @@ func TestHlr_UpdateGuti(t *testing.T) {
 		hlrRepo.On("GetByImsi", reqPb.GetImsi()).Return(&sub, nil).Once()
 		gutiRepo.On("Update", &guti).Return(nil).Once()
 
-		s, err := NewHlrRecordServer(hlrRepo, gutiRepo, factory, network, pcrf, Org)
+		s, err := NewHlrRecordServer(hlrRepo, gutiRepo, factory, network, pcrf, Org, mbC)
 		assert.NoError(t, err)
 
 		hs, err := s.UpdateGuti(context.TODO(), &reqPb)
@@ -318,6 +330,8 @@ func TestHlr_UpdateTai(t *testing.T) {
 	factory := &mocks.Factory{}
 	pcrf := &mocks.PolicyControl{}
 	network := &mocks.Network{}
+	mbC := &cmocks.MsgBusServiceClient{}
+
 	t.Run("Update", func(t *testing.T) {
 
 		reqPb := pb.UpdateTaiReq{
@@ -330,7 +344,7 @@ func TestHlr_UpdateTai(t *testing.T) {
 		hlrRepo.On("GetByImsi", reqPb.GetImsi()).Return(&sub, nil).Once()
 		hlrRepo.On("UpdateTai", sub.Imsi, tai).Return(nil).Once()
 
-		s, err := NewHlrRecordServer(hlrRepo, gutiRepo, factory, network, pcrf, Org)
+		s, err := NewHlrRecordServer(hlrRepo, gutiRepo, factory, network, pcrf, Org, mbC)
 		assert.NoError(t, err)
 
 		hs, err := s.UpdateTai(context.TODO(), &reqPb)
