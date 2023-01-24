@@ -2,13 +2,14 @@ package msgBusServiceClient
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/types/known/anypb"
 
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 
 	pb "github.com/ukama/ukama/systems/init/msgClient/pb/gen"
 	"google.golang.org/grpc"
@@ -48,7 +49,7 @@ func NewMsgBusClient(timeout time.Duration, system string,
 
 	conn, err := grpc.DialContext(ctx, msgClientURI, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		logrus.Fatalf("did not connect: %v", err)
+		log.Fatalf("did not connect: %v", err)
 	}
 	client := pb.NewMsgClientServiceClient(conn)
 
@@ -72,7 +73,7 @@ func NewMsgBusClient(timeout time.Duration, system string,
 }
 
 func (m *msgBusServiceClient) Register() error {
-	logrus.Debugf("Registering %s service instance %s to MessageBusClient at %s.", m.service, m.instanceId, m.msgClientURI)
+	log.Debugf("Registering %s service instance %s to MessageBusClient at %s.", m.service, m.instanceId, m.msgClientURI)
 	ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
 	defer cancel()
 
@@ -93,14 +94,16 @@ func (m *msgBusServiceClient) Register() error {
 
 	if resp.GetState() == pb.REGISTRAION_STATUS_REGISTERED {
 		m.uuid = resp.ServiceUuid
+	} else {
+		return fmt.Errorf("registartion failure for service %s instanceid %s: %s", m.service, m.instanceId, resp.GetState().String())
 	}
 
-	logrus.Infof("%s service instance %s to MessageBusClient at %s.", m.service, m.instanceId, resp.State.String())
+	log.Infof("%s service instance %s to MessageBusClient at %s.", m.service, m.instanceId, resp.State.String())
 	return nil
 }
 
 func (m *msgBusServiceClient) Start() error {
-	logrus.Debugf("Starting MessageClientRoutine for %s service instance %s Routine ID %s.", m.service, m.instanceId, m.uuid)
+	log.Debugf("Starting MessageClientRoutine for %s service instance %s Routine ID %s.", m.service, m.instanceId, m.uuid)
 	ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
 	defer cancel()
 
@@ -114,7 +117,7 @@ func (m *msgBusServiceClient) Start() error {
 }
 
 func (m *msgBusServiceClient) Stop() error {
-	logrus.Debugf("Stopping MessageClientRoutine for %s service instance %s Routine ID %s.", m.service, m.instanceId, m.uuid)
+	log.Debugf("Stopping MessageClientRoutine for %s service instance %s Routine ID %s.", m.service, m.instanceId, m.uuid)
 	ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
 	defer cancel()
 
@@ -129,7 +132,7 @@ func (m *msgBusServiceClient) Stop() error {
 }
 
 func (m *msgBusServiceClient) PublishRequest(route string, msg protoreflect.ProtoMessage) error {
-	logrus.Debugf("Publishing message %s to MessageClientRoutine for %s service instance %s Routine ID %s", route, m.service, m.instanceId, m.uuid)
+	log.Debugf("Publishing message %s to MessageClientRoutine for %s service instance %s Routine ID %s", route, m.service, m.instanceId, m.uuid)
 	ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
 	defer cancel()
 
@@ -145,7 +148,7 @@ func (m *msgBusServiceClient) PublishRequest(route string, msg protoreflect.Prot
 	if err != nil {
 		return err
 	}
-	logrus.Debugf("Published:\n Message: %+v  \n Key: %s \n ", msg, route)
+	log.Debugf("Published:\n Message: %+v  \n Key: %s \n ", msg, route)
 	return nil
 
 }
