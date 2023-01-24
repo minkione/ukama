@@ -18,11 +18,11 @@ var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
 
-var _regex_ActivatedSubsriber_Network = regexp.MustCompile(`^([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[4][a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})?$`)
-var _regex_ActivatedSubsriber_Package = regexp.MustCompile(`^([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[4][a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})?$`)
-var _regex_ActivatedSubsriber_Org = regexp.MustCompile(`^([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[4][a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})?$`)
+var _regex_Subscriber_Network = regexp.MustCompile(`^([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[4][a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})?$`)
+var _regex_Subscriber_Package = regexp.MustCompile(`^([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[4][a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})?$`)
+var _regex_Subscriber_Org = regexp.MustCompile(`^([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[4][a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})?$`)
 
-func (this *ActivatedSubsriber) Validate() error {
+func (this *Subscriber) Validate() error {
 	if this.Imsi == "" {
 		return github_com_mwitkow_go_proto_validators.FieldError("Imsi", fmt.Errorf(`value '%v' must not be an empty string`, this.Imsi))
 	}
@@ -41,19 +41,19 @@ func (this *ActivatedSubsriber) Validate() error {
 	if !(len(this.Iccid) < 16) {
 		return github_com_mwitkow_go_proto_validators.FieldError("Iccid", fmt.Errorf(`value '%v' must have a length smaller than '16'`, this.Iccid))
 	}
-	if !_regex_ActivatedSubsriber_Network.MatchString(this.Network) {
+	if !_regex_Subscriber_Network.MatchString(this.Network) {
 		return github_com_mwitkow_go_proto_validators.FieldError("Network", fmt.Errorf(`value '%v' must be a string conforming to regex "^([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[4][a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})?$"`, this.Network))
 	}
 	if this.Network == "" {
 		return github_com_mwitkow_go_proto_validators.FieldError("Network", fmt.Errorf(`value '%v' must not be an empty string`, this.Network))
 	}
-	if !_regex_ActivatedSubsriber_Package.MatchString(this.Package) {
+	if !_regex_Subscriber_Package.MatchString(this.Package) {
 		return github_com_mwitkow_go_proto_validators.FieldError("Package", fmt.Errorf(`value '%v' must be a string conforming to regex "^([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[4][a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})?$"`, this.Package))
 	}
 	if this.Package == "" {
 		return github_com_mwitkow_go_proto_validators.FieldError("Package", fmt.Errorf(`value '%v' must not be an empty string`, this.Package))
 	}
-	if !_regex_ActivatedSubsriber_Org.MatchString(this.Org) {
+	if !_regex_Subscriber_Org.MatchString(this.Org) {
 		return github_com_mwitkow_go_proto_validators.FieldError("Org", fmt.Errorf(`value '%v' must be a string conforming to regex "^([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[4][a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})?$"`, this.Org))
 	}
 	if this.Org == "" {
@@ -61,47 +61,27 @@ func (this *ActivatedSubsriber) Validate() error {
 	}
 	return nil
 }
-
-var _regex_InactivatedSubscriber_Network = regexp.MustCompile(`^([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[4][a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})?$`)
-var _regex_InactivatedSubscriber_Package = regexp.MustCompile(`^([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[4][a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})?$`)
-var _regex_InactivatedSubscriber_Org = regexp.MustCompile(`^([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[4][a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})?$`)
-
-func (this *InactivatedSubscriber) Validate() error {
-	if this.Imsi == "" {
-		return github_com_mwitkow_go_proto_validators.FieldError("Imsi", fmt.Errorf(`value '%v' must not be an empty string`, this.Imsi))
+func (this *AsrActivated) Validate() error {
+	if this.Subscriber != nil {
+		if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(this.Subscriber); err != nil {
+			return github_com_mwitkow_go_proto_validators.FieldError("Subscriber", err)
+		}
 	}
-	if !(len(this.Imsi) > 5) {
-		return github_com_mwitkow_go_proto_validators.FieldError("Imsi", fmt.Errorf(`value '%v' must have a length greater than '5'`, this.Imsi))
+	return nil
+}
+func (this *AsrInactivated) Validate() error {
+	if this.Subscriber != nil {
+		if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(this.Subscriber); err != nil {
+			return github_com_mwitkow_go_proto_validators.FieldError("Subscriber", err)
+		}
 	}
-	if !(len(this.Imsi) < 16) {
-		return github_com_mwitkow_go_proto_validators.FieldError("Imsi", fmt.Errorf(`value '%v' must have a length smaller than '16'`, this.Imsi))
-	}
-	if this.Iccid == "" {
-		return github_com_mwitkow_go_proto_validators.FieldError("Iccid", fmt.Errorf(`value '%v' must not be an empty string`, this.Iccid))
-	}
-	if !(len(this.Iccid) > 5) {
-		return github_com_mwitkow_go_proto_validators.FieldError("Iccid", fmt.Errorf(`value '%v' must have a length greater than '5'`, this.Iccid))
-	}
-	if !(len(this.Iccid) < 16) {
-		return github_com_mwitkow_go_proto_validators.FieldError("Iccid", fmt.Errorf(`value '%v' must have a length smaller than '16'`, this.Iccid))
-	}
-	if !_regex_InactivatedSubscriber_Network.MatchString(this.Network) {
-		return github_com_mwitkow_go_proto_validators.FieldError("Network", fmt.Errorf(`value '%v' must be a string conforming to regex "^([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[4][a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})?$"`, this.Network))
-	}
-	if this.Network == "" {
-		return github_com_mwitkow_go_proto_validators.FieldError("Network", fmt.Errorf(`value '%v' must not be an empty string`, this.Network))
-	}
-	if !_regex_InactivatedSubscriber_Package.MatchString(this.Package) {
-		return github_com_mwitkow_go_proto_validators.FieldError("Package", fmt.Errorf(`value '%v' must be a string conforming to regex "^([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[4][a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})?$"`, this.Package))
-	}
-	if this.Package == "" {
-		return github_com_mwitkow_go_proto_validators.FieldError("Package", fmt.Errorf(`value '%v' must not be an empty string`, this.Package))
-	}
-	if !_regex_InactivatedSubscriber_Org.MatchString(this.Org) {
-		return github_com_mwitkow_go_proto_validators.FieldError("Org", fmt.Errorf(`value '%v' must be a string conforming to regex "^([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[4][a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})?$"`, this.Org))
-	}
-	if this.Org == "" {
-		return github_com_mwitkow_go_proto_validators.FieldError("Org", fmt.Errorf(`value '%v' must not be an empty string`, this.Org))
+	return nil
+}
+func (this *AsrUpdated) Validate() error {
+	if this.Subscriber != nil {
+		if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(this.Subscriber); err != nil {
+			return github_com_mwitkow_go_proto_validators.FieldError("Subscriber", err)
+		}
 	}
 	return nil
 }
