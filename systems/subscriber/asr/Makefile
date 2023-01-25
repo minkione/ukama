@@ -42,3 +42,6 @@ integration.test:
 
 integration.build:
 	env CGO_ENABLED=0 go test ./test/integration -tags integration -v -c -o bin/integration
+
+docs:
+	protoc -I ./pb  -I ../../common/pb/dep --doc_out=. --doc_opt=./template.tmpl,README.md pb/*.proto & sh ./generate-dir-tree.sh $(PWD)
