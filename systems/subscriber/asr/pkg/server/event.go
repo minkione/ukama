@@ -8,20 +8,20 @@ import (
 	"github.com/ukama/ukama/systems/subscriber/asr/pkg/db"
 )
 
-type HlrEventServer struct {
+type AsrEventServer struct {
 	asrRepo  db.AsrRecordRepo
 	gutiRepo db.GutiRepo
 	epb.UnimplementedEventNotificationServiceServer
 }
 
-func NewHlrEventServer(asrRepo db.AsrRecordRepo, gutiRepo db.GutiRepo) *HlrEventServer {
-	return &HlrEventServer{
+func NewAsrEventServer(asrRepo db.AsrRecordRepo, gutiRepo db.GutiRepo) *AsrEventServer {
+	return &AsrEventServer{
 		asrRepo:  asrRepo,
 		gutiRepo: gutiRepo,
 	}
 }
 
-func (l *HlrEventServer) EventNotification(ctx context.Context, e *epb.Event) (*epb.EventResponse, error) {
+func (l *AsrEventServer) EventNotification(ctx context.Context, e *epb.Event) (*epb.EventResponse, error) {
 	log.Infof("Received a message with Routing key %s and Message %+v", e.RoutingKey, e.Msg)
 	switch e.RoutingKey {
 

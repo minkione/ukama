@@ -15,7 +15,7 @@ type Config struct {
 	Queue             *config.Queue     `default:"{}"`
 	Service           *config.Service   `default:"{}"`
 	SimTokenKey       string            `default:"11111111111111111111111111111111"`
-	HlrHost           string            `default:"localhost"`
+	AsrHost           string            `default:"localhost"`
 	NetworkHost       string            `default:"http://localhost:8085"`
 	PCRFHost          string            `default:"http://localhost:8085"`
 	FactoryHost       string            `default:"http://localhost:8085"`

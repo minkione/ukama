@@ -85,8 +85,8 @@ func (rt *Router) Run() {
 
 func (r *Router) init() {
 
-	r.f = rest.NewFizzRouter(r.config.serverConf, "hlr-stubs", "0,.0.0.", r.config.debugMode)
-	v1 := r.f.Group("/v1", " ", " HLR service stubs version v1")
+	r.f = rest.NewFizzRouter(r.config.serverConf, "asr-stubs", "0,.0.0.", r.config.debugMode)
+	v1 := r.f.Group("/v1", " ", " ASR service stubs version v1")
 
 	f := v1.Group("/factory", "Sim Factory", "Sim Factory")
 	f.GET("/simcards/:iccid", formatDoc("Read Sim card Information", ""), tonic.Handler(r.getSimCard, http.StatusOK))

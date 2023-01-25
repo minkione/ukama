@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	pb "github.com/ukama/ukama/systems/subscriber/asr/pb/gen"
 	"github.com/ukama/ukama/systems/subscriber/asr/pkg/client"
@@ -62,12 +62,12 @@ func init() {
 	r := confr.NewConfReader("integration")
 	r.Read(tConfig)
 
-	logrus.Info("Expected config ", "integration.yaml", " or env vars for ex: SERVICEHOST")
-	logrus.Infof("%+v", tConfig)
+	log.Info("Expected config ", "integration.yaml", " or env vars for ex: SERVICEHOST")
+	log.Infof("%+v", tConfig)
 }
 
-func CreateHlrClient() (*grpc.ClientConn, pb.AsrRecordServiceClient, error) {
-	logrus.Infoln("Connecting to HLR ", tConfig.ServiceHost)
+func CreateAsrClient() (*grpc.ClientConn, pb.AsrRecordServiceClient, error) {
+	log.Infoln("Connecting to ASR ", tConfig.ServiceHost)
 	context, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 	conn, err := grpc.DialContext(context, tConfig.ServiceHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -84,8 +84,8 @@ func Test_FullFlow(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 
-	logrus.Infoln("Connecting to service ", tConfig.ServiceHost)
-	conn, c, err := CreateHlrClient()
+	log.Infoln("Connecting to service ", tConfig.ServiceHost)
+	conn, c, err := CreateAsrClient()
 	defer conn.Close()
 	if err != nil {
 		assert.NoErrorf(t, err, "did not connect: %+v\n", err)

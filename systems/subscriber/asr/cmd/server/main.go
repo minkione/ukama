@@ -83,7 +83,7 @@ func runGrpcServer(gormdb sql.Db) {
 		serviceConfig.MsgClient.ListenerRoutes)
 
 	log.Debugf("MessageBus Client is %+v", mbClient)
-	hlr := db.NewAsrRecordRepo(gormdb)
+	asr := db.NewAsrRecordRepo(gormdb)
 	guti := db.NewGutiRepo(gormdb)
 
 	factory, err := client.NewFactoryClient(serviceConfig.FactoryHost, pkg.IsDebugMode)
@@ -101,17 +101,17 @@ func runGrpcServer(gormdb sql.Db) {
 		log.Fatalf("PCRF Client initialization failed. Error: %v", err)
 	}
 
-	// hlr service
-	hlrServer, err := server.NewAsrRecordServer(hlr, guti,
+	// asr service
+	asrServer, err := server.NewAsrRecordServer(asr, guti,
 		factory, network, pcrf, serviceConfig.Org, mbClient)
 
 	if err != nil {
-		log.Fatalf("hlr server initialization failed. Error: %v", err)
+		log.Fatalf("asr server initialization failed. Error: %v", err)
 	}
-	nSrv := server.NewHlrEventServer(hlr, guti)
+	nSrv := server.NewAsrEventServer(asr, guti)
 
 	rpcServer := ugrpc.NewGrpcServer(*serviceConfig.Grpc, func(s *grpc.Server) {
-		gen.RegisterAsrRecordServiceServer(s, hlrServer)
+		gen.RegisterAsrRecordServiceServer(s, asrServer)
 		egen.RegisterEventNotificationServiceServer(s, nSrv)
 	})
 

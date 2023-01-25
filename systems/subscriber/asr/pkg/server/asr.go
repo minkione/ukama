@@ -33,7 +33,7 @@ type AsrRecordServer struct {
 
 func NewAsrRecordServer(asrRepo db.AsrRecordRepo, gutiRepo db.GutiRepo, factory client.Factory, network client.Network, pcrf client.PolicyControl, org string, msgBus mb.MsgBusServiceClient) (*AsrRecordServer, error) {
 
-	hlr := AsrRecordServer{
+	asr := AsrRecordServer{
 		asrRepo:        asrRepo,
 		gutiRepo:       gutiRepo,
 		Org:            org,
@@ -43,7 +43,7 @@ func NewAsrRecordServer(asrRepo db.AsrRecordRepo, gutiRepo db.GutiRepo, factory 
 		msgbus:         msgBus,
 		baseRoutingKey: msgbus.NewRoutingKeyBuilder().SetCloudSource().SetContainer(pkg.ServiceName),
 	}
-	return &hlr, nil
+	return &asr, nil
 }
 
 func (s *AsrRecordServer) Read(c context.Context, req *pb.ReadReq) (*pb.ReadResp, error) {
@@ -126,8 +126,8 @@ func (s *AsrRecordServer) Activate(c context.Context, req *pb.ActivateReq) (*pb.
 		return nil, grpc.SqlErrorToGrpc(err, "error adding to pcrf")
 	}
 
-	/* Add to HLR */
-	hlr := &db.Asr{
+	/* Add to ASR */
+	asr := &db.Asr{
 		Iccid:          req.Iccid,
 		Imsi:           sim.Imsi,
 		Op:             sim.Op,
@@ -144,18 +144,18 @@ func (s *AsrRecordServer) Activate(c context.Context, req *pb.ActivateReq) (*pb.
 		NetworkID:      nId,
 	}
 
-	err = s.asrRepo.Add(hlr)
+	err = s.asrRepo.Add(asr)
 	if err != nil {
-		return nil, grpc.SqlErrorToGrpc(err, "error updating hlr")
+		return nil, grpc.SqlErrorToGrpc(err, "error updating asr")
 	}
 
 	/* Create event */
 	e := &epb.AsrActivated{
 		Subscriber: &epb.Subscriber{
-			Imsi:    hlr.Imsi,
-			Iccid:   hlr.Iccid,
-			Network: hlr.NetworkID.String(),
-			Package: hlr.PackageId.String(),
+			Imsi:    asr.Imsi,
+			Iccid:   asr.Iccid,
+			Network: asr.NetworkID.String(),
+			Package: asr.PackageId.String(),
 			Org:     s.Org,
 		},
 	}
@@ -170,7 +170,7 @@ func (s *AsrRecordServer) Activate(c context.Context, req *pb.ActivateReq) (*pb.
 }
 
 func (s *AsrRecordServer) UpdatePackage(c context.Context, req *pb.UpdatePackageReq) (*pb.UpdatePackageResp, error) {
-	hlrRecord, err := s.asrRepo.GetByIccid(req.GetIccid())
+	asrRecord, err := s.asrRepo.GetByIccid(req.GetIccid())
 	if err != nil {
 		return nil, grpc.SqlErrorToGrpc(err, "error getting iccid")
 	}
@@ -183,7 +183,7 @@ func (s *AsrRecordServer) UpdatePackage(c context.Context, req *pb.UpdatePackage
 	}
 
 	pD := client.PolicyControlSimPackageUpdate{
-		Imsi:      hlrRecord.Imsi,
+		Imsi:      asrRecord.Imsi,
 		PackageId: pId,
 	}
 
@@ -192,17 +192,17 @@ func (s *AsrRecordServer) UpdatePackage(c context.Context, req *pb.UpdatePackage
 		return nil, grpc.SqlErrorToGrpc(err, "error updating pcrf")
 	}
 
-	err = s.asrRepo.UpdatePackage(hlrRecord.Imsi, pId)
+	err = s.asrRepo.UpdatePackage(asrRecord.Imsi, pId)
 	if err != nil {
-		return nil, grpc.SqlErrorToGrpc(err, "error updating hlr")
+		return nil, grpc.SqlErrorToGrpc(err, "error updating asr")
 	}
 
 	/* Create event */
 	e := &epb.AsrUpdated{
 		Subscriber: &epb.Subscriber{
-			Imsi:    hlrRecord.Imsi,
-			Iccid:   hlrRecord.Iccid,
-			Network: hlrRecord.NetworkID.String(),
+			Imsi:    asrRecord.Imsi,
+			Iccid:   asrRecord.Iccid,
+			Network: asrRecord.NetworkID.String(),
 			Package: req.PackageId,
 			Org:     s.Org,
 		},
@@ -243,7 +243,7 @@ func (s *AsrRecordServer) Inactivate(c context.Context, req *pb.InactivateReq) (
 
 	err = s.asrRepo.Delete(delAsrRecord.Imsi)
 	if err != nil {
-		return nil, grpc.SqlErrorToGrpc(err, "error updating hlr")
+		return nil, grpc.SqlErrorToGrpc(err, "error updating asr")
 	}
 
 	/* Create event */
