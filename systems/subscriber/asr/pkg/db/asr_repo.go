@@ -1,4 +1,4 @@
-// This is an example of a repository
+// This is an example of a repositoryasrRepo
 package db
 
 import (
@@ -14,46 +14,46 @@ import (
 const TaiNotUpdatedErr = "more recent tai for imsi exist"
 
 // declare interface so that we can mock it
-type HlrRecordRepo interface {
-	Add(record *Hlr) error
-	Get(id int) (*Hlr, error)
-	GetByImsi(imsi string) (*Hlr, error)
-	GetByIccid(iccid string) (*Hlr, error)
-	Update(imsi string, record *Hlr) error
+type AsrRecordRepo interface {
+	Add(record *Asr) error
+	Get(id int) (*Asr, error)
+	GetByImsi(imsi string) (*Asr, error)
+	GetByIccid(iccid string) (*Asr, error)
+	Update(imsi string, record *Asr) error
 	UpdatePackage(imsi string, packageId uuid.UUID) error
 	DeleteByIccid(iccid string, nestedFunc ...func(*gorm.DB) error) error
 	Delete(imsi string, nestedFunc ...func(*gorm.DB) error) error
 	UpdateTai(imis string, tai Tai) error
 }
 
-type hlrRecordRepo struct {
+type asrRecordRepo struct {
 	db sql.Db
 }
 
-func NewHlrRecordRepo(db sql.Db) *hlrRecordRepo {
-	return &hlrRecordRepo{
+func NewAsrRecordRepo(db sql.Db) *asrRecordRepo {
+	return &asrRecordRepo{
 		db: db,
 	}
 }
 
-func (r *hlrRecordRepo) Add(rec *Hlr) error {
+func (r *asrRecordRepo) Add(rec *Asr) error {
 	d := r.db.GetGormDb().Create(rec)
 	return d.Error
 }
 
-func (r *hlrRecordRepo) Update(imsiToUpdate string, rec *Hlr) error {
+func (r *asrRecordRepo) Update(imsiToUpdate string, rec *Asr) error {
 	d := r.db.GetGormDb().Where("imsi=?", imsiToUpdate).Updates(rec)
 	return d.Error
 }
 
-func (r *hlrRecordRepo) UpdatePackage(imsiToUpdate string, packageId uuid.UUID) error {
-	rec := &Hlr{PackageId: packageId}
+func (r *asrRecordRepo) UpdatePackage(imsiToUpdate string, packageId uuid.UUID) error {
+	rec := &Asr{PackageId: packageId}
 	d := r.db.GetGormDb().Where("imsi=?", imsiToUpdate).Updates(rec)
 	return d.Error
 }
 
-func (r *hlrRecordRepo) Get(id int) (*Hlr, error) {
-	var hss Hlr
+func (r *asrRecordRepo) Get(id int) (*Asr, error) {
+	var hss Asr
 	result := r.db.GetGormDb().Preload(clause.Associations).First(&hss, id)
 	if result.Error != nil {
 		return nil, result.Error
@@ -62,50 +62,50 @@ func (r *hlrRecordRepo) Get(id int) (*Hlr, error) {
 	return &hss, nil
 }
 
-func (r *hlrRecordRepo) GetByImsi(imsi string) (*Hlr, error) {
-	var hlr Hlr
-	result := r.db.GetGormDb().Preload(clause.Associations).Where("imsi=?", imsi).First(&hlr)
+func (r *asrRecordRepo) GetByImsi(imsi string) (*Asr, error) {
+	var asr Asr
+	result := r.db.GetGormDb().Preload(clause.Associations).Where("imsi=?", imsi).First(&asr)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
-	return &hlr, nil
+	return &asr, nil
 }
 
-func (r *hlrRecordRepo) GetByIccid(iccid string) (*Hlr, error) {
-	var hlr Hlr
-	result := r.db.GetGormDb().Preload(clause.Associations).Where("iccid=?", iccid).First(&hlr)
+func (r *asrRecordRepo) GetByIccid(iccid string) (*Asr, error) {
+	var asr Asr
+	result := r.db.GetGormDb().Preload(clause.Associations).Where("iccid=?", iccid).First(&asr)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
-	return &hlr, nil
+	return &asr, nil
 }
 
-func (r *hlrRecordRepo) Delete(imsi string, nestedFunc ...func(*gorm.DB) error) error {
+func (r *asrRecordRepo) Delete(imsi string, nestedFunc ...func(*gorm.DB) error) error {
 	return r.db.ExecuteInTransaction2(func(tx *gorm.DB) *gorm.DB {
-		return tx.Where(&Hlr{Imsi: imsi}).Delete(&Hlr{})
+		return tx.Where(&Asr{Imsi: imsi}).Delete(&Asr{})
 	}, nestedFunc...)
 }
 
-func (r *hlrRecordRepo) DeleteByIccid(iccid string, nestedFunc ...func(*gorm.DB) error) error {
+func (r *asrRecordRepo) DeleteByIccid(iccid string, nestedFunc ...func(*gorm.DB) error) error {
 	return r.db.ExecuteInTransaction2(func(tx *gorm.DB) *gorm.DB {
-		return tx.Where(&Hlr{Iccid: iccid}).Delete(&Hlr{})
+		return tx.Where(&Asr{Iccid: iccid}).Delete(&Asr{})
 	}, nestedFunc...)
 
 }
 
 // ReplaceTai removes all TAI record for IMSI and adds new ones
-func (r *hlrRecordRepo) UpdateTai(imsi string, tai Tai) error {
-	var imsiM Hlr
+func (r *asrRecordRepo) UpdateTai(imsi string, tai Tai) error {
+	var imsiM Asr
 	return r.db.GetGormDb().Transaction(func(tx *gorm.DB) error {
-		err := tx.Model(&Hlr{}).Where("imsi=?", imsi).First(&imsiM).Error
+		err := tx.Model(&Asr{}).Where("imsi=?", imsi).First(&imsiM).Error
 		if err != nil {
 			return errors.Wrap(err, "error getting imsi")
 		}
 
 		var count int64
-		err = tx.Model(&tai).Where("hlr_id = ? and device_updated_at > ?", imsiM.ID, tai.DeviceUpdatedAt).Count(&count).Error
+		err = tx.Model(&tai).Where("asr_id = ? and device_updated_at > ?", imsiM.ID, tai.DeviceUpdatedAt).Count(&count).Error
 		if err != nil {
 			return errors.Wrap(err, "error getting tai count")
 		}
@@ -113,12 +113,12 @@ func (r *hlrRecordRepo) UpdateTai(imsi string, tai Tai) error {
 			return fmt.Errorf(TaiNotUpdatedErr)
 		}
 
-		err = tx.Where("hlr_id=?", imsiM.ID).Delete(&Tai{}).Error
+		err = tx.Where("asr_id=?", imsiM.ID).Delete(&Tai{}).Error
 		if err != nil {
 			return errors.Wrap(err, "error deleting tai")
 		}
 
-		tai.HlrID = imsiM.ID
+		tai.AsrID = imsiM.ID
 		err = tx.Create(&tai).Error
 		if err != nil {
 			return errors.Wrap(err, "error adding tai")

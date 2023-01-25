@@ -9,14 +9,14 @@ import (
 )
 
 type HlrEventServer struct {
-	hlrRepo  db.HlrRecordRepo
+	asrRepo  db.AsrRecordRepo
 	gutiRepo db.GutiRepo
 	epb.UnimplementedEventNotificationServiceServer
 }
 
-func NewHlrEventServer(hlrRepo db.HlrRecordRepo, gutiRepo db.GutiRepo) *HlrEventServer {
+func NewHlrEventServer(asrRepo db.AsrRecordRepo, gutiRepo db.GutiRepo) *HlrEventServer {
 	return &HlrEventServer{
-		hlrRepo:  hlrRepo,
+		asrRepo:  asrRepo,
 		gutiRepo: gutiRepo,
 	}
 }

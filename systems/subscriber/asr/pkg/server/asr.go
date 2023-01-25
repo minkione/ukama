@@ -19,9 +19,9 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type HlrRecordServer struct {
-	pb.UnimplementedHlrRecordServiceServer
-	hlrRepo        db.HlrRecordRepo
+type AsrRecordServer struct {
+	pb.UnimplementedAsrRecordServiceServer
+	asrRepo        db.AsrRecordRepo
 	gutiRepo       db.GutiRepo
 	pcrf           client.PolicyControl
 	network        client.Network
@@ -31,10 +31,10 @@ type HlrRecordServer struct {
 	Org            string
 }
 
-func NewHlrRecordServer(hlrRepo db.HlrRecordRepo, gutiRepo db.GutiRepo, factory client.Factory, network client.Network, pcrf client.PolicyControl, org string, msgBus mb.MsgBusServiceClient) (*HlrRecordServer, error) {
+func NewAsrRecordServer(asrRepo db.AsrRecordRepo, gutiRepo db.GutiRepo, factory client.Factory, network client.Network, pcrf client.PolicyControl, org string, msgBus mb.MsgBusServiceClient) (*AsrRecordServer, error) {
 
-	hlr := HlrRecordServer{
-		hlrRepo:        hlrRepo,
+	hlr := AsrRecordServer{
+		asrRepo:        asrRepo,
 		gutiRepo:       gutiRepo,
 		Org:            org,
 		factory:        factory,
@@ -46,20 +46,20 @@ func NewHlrRecordServer(hlrRepo db.HlrRecordRepo, gutiRepo db.GutiRepo, factory 
 	return &hlr, nil
 }
 
-func (s *HlrRecordServer) Read(c context.Context, req *pb.ReadReq) (*pb.ReadResp, error) {
-	var sub *db.Hlr
+func (s *AsrRecordServer) Read(c context.Context, req *pb.ReadReq) (*pb.ReadResp, error) {
+	var sub *db.Asr
 	var err error
 
 	switch req.Id.(type) {
 	case *pb.ReadReq_Imsi:
 
-		sub, err = s.hlrRepo.GetByImsi(req.GetImsi())
+		sub, err = s.asrRepo.GetByImsi(req.GetImsi())
 		if err != nil {
 			return nil, grpc.SqlErrorToGrpc(err, "error getting imsi")
 		}
 
 	case *pb.ReadReq_Iccid:
-		sub, err = s.hlrRepo.GetByIccid(req.GetIccid())
+		sub, err = s.asrRepo.GetByIccid(req.GetIccid())
 		if err != nil {
 			return nil, grpc.SqlErrorToGrpc(err, "error getting iccid")
 		}
@@ -87,7 +87,7 @@ func (s *HlrRecordServer) Read(c context.Context, req *pb.ReadReq) (*pb.ReadResp
 	return resp, nil
 }
 
-func (s *HlrRecordServer) Activate(c context.Context, req *pb.ActivateReq) (*pb.ActivateResp, error) {
+func (s *AsrRecordServer) Activate(c context.Context, req *pb.ActivateReq) (*pb.ActivateResp, error) {
 
 	/* Validate network in Org */
 	err := s.network.ValidateNetwork(req.Network, s.Org)
@@ -127,7 +127,7 @@ func (s *HlrRecordServer) Activate(c context.Context, req *pb.ActivateReq) (*pb.
 	}
 
 	/* Add to HLR */
-	hlr := &db.Hlr{
+	hlr := &db.Asr{
 		Iccid:          req.Iccid,
 		Imsi:           sim.Imsi,
 		Op:             sim.Op,
@@ -144,7 +144,7 @@ func (s *HlrRecordServer) Activate(c context.Context, req *pb.ActivateReq) (*pb.
 		NetworkID:      nId,
 	}
 
-	err = s.hlrRepo.Add(hlr)
+	err = s.asrRepo.Add(hlr)
 	if err != nil {
 		return nil, grpc.SqlErrorToGrpc(err, "error updating hlr")
 	}
@@ -169,8 +169,8 @@ func (s *HlrRecordServer) Activate(c context.Context, req *pb.ActivateReq) (*pb.
 	return &pb.ActivateResp{}, err
 }
 
-func (s *HlrRecordServer) UpdatePackage(c context.Context, req *pb.UpdatePackageReq) (*pb.UpdatePackageResp, error) {
-	hlrRecord, err := s.hlrRepo.GetByIccid(req.GetIccid())
+func (s *AsrRecordServer) UpdatePackage(c context.Context, req *pb.UpdatePackageReq) (*pb.UpdatePackageResp, error) {
+	hlrRecord, err := s.asrRepo.GetByIccid(req.GetIccid())
 	if err != nil {
 		return nil, grpc.SqlErrorToGrpc(err, "error getting iccid")
 	}
@@ -192,7 +192,7 @@ func (s *HlrRecordServer) UpdatePackage(c context.Context, req *pb.UpdatePackage
 		return nil, grpc.SqlErrorToGrpc(err, "error updating pcrf")
 	}
 
-	err = s.hlrRepo.UpdatePackage(hlrRecord.Imsi, pId)
+	err = s.asrRepo.UpdatePackage(hlrRecord.Imsi, pId)
 	if err != nil {
 		return nil, grpc.SqlErrorToGrpc(err, "error updating hlr")
 	}
@@ -217,31 +217,31 @@ func (s *HlrRecordServer) UpdatePackage(c context.Context, req *pb.UpdatePackage
 	return &pb.UpdatePackageResp{}, nil
 }
 
-func (s *HlrRecordServer) Inactivate(c context.Context, req *pb.InactivateReq) (*pb.InactivateResp, error) {
-	var delHlrRecord *db.Hlr
+func (s *AsrRecordServer) Inactivate(c context.Context, req *pb.InactivateReq) (*pb.InactivateResp, error) {
+	var delAsrRecord *db.Asr
 	var err error
 
 	switch req.Id.(type) {
 	case *pb.InactivateReq_Imsi:
 
-		delHlrRecord, err = s.hlrRepo.GetByImsi(req.GetImsi())
+		delAsrRecord, err = s.asrRepo.GetByImsi(req.GetImsi())
 		if err != nil {
 			return nil, grpc.SqlErrorToGrpc(err, "error getting imsi")
 		}
 
 	case *pb.InactivateReq_Iccid:
-		delHlrRecord, err = s.hlrRepo.GetByIccid(req.GetIccid())
+		delAsrRecord, err = s.asrRepo.GetByIccid(req.GetIccid())
 		if err != nil {
 			return nil, grpc.SqlErrorToGrpc(err, "error getting iccid")
 		}
 	}
 
-	err = s.pcrf.DeleteSim(delHlrRecord.Imsi)
+	err = s.pcrf.DeleteSim(delAsrRecord.Imsi)
 	if err != nil {
 		return nil, grpc.SqlErrorToGrpc(err, "error updating pcrf")
 	}
 
-	err = s.hlrRepo.Delete(delHlrRecord.Imsi)
+	err = s.asrRepo.Delete(delAsrRecord.Imsi)
 	if err != nil {
 		return nil, grpc.SqlErrorToGrpc(err, "error updating hlr")
 	}
@@ -249,10 +249,10 @@ func (s *HlrRecordServer) Inactivate(c context.Context, req *pb.InactivateReq) (
 	/* Create event */
 	e := &epb.AsrInactivated{
 		Subscriber: &epb.Subscriber{
-			Imsi:    delHlrRecord.Imsi,
-			Iccid:   delHlrRecord.Iccid,
-			Network: delHlrRecord.NetworkID.String(),
-			Package: delHlrRecord.PackageId.String(),
+			Imsi:    delAsrRecord.Imsi,
+			Iccid:   delAsrRecord.Iccid,
+			Network: delAsrRecord.NetworkID.String(),
+			Package: delAsrRecord.PackageId.String(),
 			Org:     s.Org,
 		},
 	}
@@ -267,8 +267,8 @@ func (s *HlrRecordServer) Inactivate(c context.Context, req *pb.InactivateReq) (
 
 }
 
-func (s *HlrRecordServer) UpdateGuti(c context.Context, req *pb.UpdateGutiReq) (*pb.UpdateGutiResp, error) {
-	_, err := s.hlrRepo.GetByImsi(req.Imsi)
+func (s *AsrRecordServer) UpdateGuti(c context.Context, req *pb.UpdateGutiReq) (*pb.UpdateGutiResp, error) {
+	_, err := s.asrRepo.GetByImsi(req.Imsi)
 	if err != nil {
 		return nil, grpc.SqlErrorToGrpc(err, "imsi")
 	}
@@ -292,13 +292,13 @@ func (s *HlrRecordServer) UpdateGuti(c context.Context, req *pb.UpdateGutiReq) (
 	return &pb.UpdateGutiResp{}, nil
 }
 
-func (s *HlrRecordServer) UpdateTai(c context.Context, req *pb.UpdateTaiReq) (*pb.UpdateTaiResp, error) {
-	_, err := s.hlrRepo.GetByImsi(req.Imsi)
+func (s *AsrRecordServer) UpdateTai(c context.Context, req *pb.UpdateTaiReq) (*pb.UpdateTaiResp, error) {
+	_, err := s.asrRepo.GetByImsi(req.Imsi)
 	if err != nil {
 		return nil, grpc.SqlErrorToGrpc(err, "imsi")
 	}
 
-	err = s.hlrRepo.UpdateTai(req.Imsi, db.Tai{
+	err = s.asrRepo.UpdateTai(req.Imsi, db.Tai{
 		PlmnId:          req.PlmnId,
 		Tac:             req.Tac,
 		DeviceUpdatedAt: time.Unix(int64(req.UpdatedAt), 0),

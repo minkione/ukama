@@ -56,7 +56,7 @@ func initConfig() {
 func initDb() sql.Db {
 	log.Infof("Initializing Database")
 	d := sql.NewDb(serviceConfig.DB, true)
-	err := d.Init(&db.Hlr{}, &db.Guti{}, &db.Tai{})
+	err := d.Init(&db.Asr{}, &db.Guti{}, &db.Tai{})
 	if err != nil {
 		log.Fatalf("Database initialization failed. Error: %v", err)
 	}
@@ -83,7 +83,7 @@ func runGrpcServer(gormdb sql.Db) {
 		serviceConfig.MsgClient.ListenerRoutes)
 
 	log.Debugf("MessageBus Client is %+v", mbClient)
-	hlr := db.NewHlrRecordRepo(gormdb)
+	hlr := db.NewAsrRecordRepo(gormdb)
 	guti := db.NewGutiRepo(gormdb)
 
 	factory, err := client.NewFactoryClient(serviceConfig.FactoryHost, pkg.IsDebugMode)
@@ -102,7 +102,7 @@ func runGrpcServer(gormdb sql.Db) {
 	}
 
 	// hlr service
-	hlrServer, err := server.NewHlrRecordServer(hlr, guti,
+	hlrServer, err := server.NewAsrRecordServer(hlr, guti,
 		factory, network, pcrf, serviceConfig.Org, mbClient)
 
 	if err != nil {
@@ -111,7 +111,7 @@ func runGrpcServer(gormdb sql.Db) {
 	nSrv := server.NewHlrEventServer(hlr, guti)
 
 	rpcServer := ugrpc.NewGrpcServer(*serviceConfig.Grpc, func(s *grpc.Server) {
-		gen.RegisterHlrRecordServiceServer(s, hlrServer)
+		gen.RegisterAsrRecordServiceServer(s, hlrServer)
 		egen.RegisterEventNotificationServiceServer(s, nSrv)
 	})
 

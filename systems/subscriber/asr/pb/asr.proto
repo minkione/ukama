@@ -2,14 +2,12 @@ syntax = "proto3";
 
 option go_package = "pb/gen";
 
-package ukama.hss.v1;
+package ukama.subscriber.asr.v1;
 
 import "google/api/annotations.proto";
 import "validator.proto";
 
-service HlrRecordService {
-
-    //rpc Update(UpdateRecordReq) returns (UpdateRecordResp);
+service AsrRecordService {
 
     /* Subscriber Agent */ 
     rpc Activate(ActivateReq) returns (ActivateResp);

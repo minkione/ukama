@@ -18,7 +18,7 @@ import (
 
 var Org = "40987edb-ebb6-4f84-a27c-99db7c136127"
 
-var sub = db.Hlr{
+var sub = db.Asr{
 	Iccid:          "0123456789012345678912",
 	Imsi:           "012345678912345",
 	Op:             []byte("0123456789012345"),
@@ -63,8 +63,8 @@ var tai = db.Tai{
 	DeviceUpdatedAt: time.Unix(int64(1639144056), 0),
 }
 
-func TestHlr_Read(t *testing.T) {
-	hlrRepo := &mocks.HlrRecordRepo{}
+func TestAsr_Read(t *testing.T) {
+	asrRepo := &mocks.AsrRecordRepo{}
 	gutiRepo := &mocks.GutiRepo{}
 	factory := &mocks.Factory{}
 	pcrf := &mocks.PolicyControl{}
@@ -79,9 +79,9 @@ func TestHlr_Read(t *testing.T) {
 			},
 		}
 
-		hlrRepo.On("GetByIccid", reqPb.GetIccid()).Return(&sub, nil).Once()
+		asrRepo.On("GetByIccid", reqPb.GetIccid()).Return(&sub, nil).Once()
 
-		s, err := NewHlrRecordServer(hlrRepo, gutiRepo, factory, network, pcrf, Org, mbC)
+		s, err := NewAsrRecordServer(asrRepo, gutiRepo, factory, network, pcrf, Org, mbC)
 		assert.NoError(t, err)
 
 		hs, err := s.Read(context.TODO(), &reqPb)
@@ -89,7 +89,7 @@ func TestHlr_Read(t *testing.T) {
 
 		assert.NotNil(t, hs)
 
-		hlrRepo.AssertExpectations(t)
+		asrRepo.AssertExpectations(t)
 		gutiRepo.AssertExpectations(t)
 		assert.NoError(t, err)
 	})
@@ -102,9 +102,9 @@ func TestHlr_Read(t *testing.T) {
 			},
 		}
 
-		hlrRepo.On("GetByImsi", reqPb.GetImsi()).Return(&sub, nil).Once()
+		asrRepo.On("GetByImsi", reqPb.GetImsi()).Return(&sub, nil).Once()
 
-		s, err := NewHlrRecordServer(hlrRepo, gutiRepo, factory, network, pcrf, Org, mbC)
+		s, err := NewAsrRecordServer(asrRepo, gutiRepo, factory, network, pcrf, Org, mbC)
 		assert.NoError(t, err)
 
 		hs, err := s.Read(context.TODO(), &reqPb)
@@ -112,15 +112,15 @@ func TestHlr_Read(t *testing.T) {
 
 		assert.NotNil(t, hs)
 
-		hlrRepo.AssertExpectations(t)
+		asrRepo.AssertExpectations(t)
 		gutiRepo.AssertExpectations(t)
 		assert.NoError(t, err)
 	})
 
 }
 
-func TestHlr_UpdatePackage(t *testing.T) {
-	hlrRepo := &mocks.HlrRecordRepo{}
+func TestAsr_UpdatePackage(t *testing.T) {
+	asrRepo := &mocks.AsrRecordRepo{}
 	gutiRepo := &mocks.GutiRepo{}
 	factory := &mocks.Factory{}
 	pcrf := &mocks.PolicyControl{}
@@ -140,12 +140,12 @@ func TestHlr_UpdatePackage(t *testing.T) {
 		PackageId: pId,
 	}
 
-	hlrRepo.On("GetByIccid", reqPb.GetIccid()).Return(&sub, nil).Once()
+	asrRepo.On("GetByIccid", reqPb.GetIccid()).Return(&sub, nil).Once()
 	pcrf.On("UpdateSim", req).Return(nil).Once()
-	hlrRepo.On("UpdatePackage", sub.Imsi, pId).Return(nil).Once()
-	mbC.On("PublishRequest", "event.cloud.hlr.activesubscriber.update", mock.Anything).Return(nil).Once()
+	asrRepo.On("UpdatePackage", sub.Imsi, pId).Return(nil).Once()
+	mbC.On("PublishRequest", "event.cloud.asr.activesubscriber.update", mock.Anything).Return(nil).Once()
 
-	s, err := NewHlrRecordServer(hlrRepo, gutiRepo, factory, network, pcrf, Org, mbC)
+	s, err := NewAsrRecordServer(asrRepo, gutiRepo, factory, network, pcrf, Org, mbC)
 	assert.NoError(t, err)
 
 	hs, err := s.UpdatePackage(context.TODO(), &reqPb)
@@ -153,14 +153,14 @@ func TestHlr_UpdatePackage(t *testing.T) {
 
 	assert.NotNil(t, hs)
 
-	hlrRepo.AssertExpectations(t)
+	asrRepo.AssertExpectations(t)
 	gutiRepo.AssertExpectations(t)
 	assert.NoError(t, err)
 
 }
 
-func TestHlr_Activate(t *testing.T) {
-	hlrRepo := &mocks.HlrRecordRepo{}
+func TestAsr_Activate(t *testing.T) {
+	asrRepo := &mocks.AsrRecordRepo{}
 	gutiRepo := &mocks.GutiRepo{}
 	factory := &mocks.Factory{}
 	pcrf := &mocks.PolicyControl{}
@@ -189,7 +189,7 @@ func TestHlr_Activate(t *testing.T) {
 			Visitor:   false, // We will using this flag on roaming in VLR
 		}
 
-		hlr := &db.Hlr{
+		asr := &db.Asr{
 			Iccid:          reqPb.Iccid,
 			Imsi:           sim.Imsi,
 			Op:             sim.Op,
@@ -209,10 +209,10 @@ func TestHlr_Activate(t *testing.T) {
 		network.On("ValidateNetwork", reqPb.Network, Org).Return(nil).Once()
 		factory.On("ReadSimCardInfo", reqPb.Iccid).Return(&sim, nil).Once()
 		pcrf.On("AddSim", pReq).Return(nil).Once()
-		hlrRepo.On("Add", hlr).Return(nil).Once()
-		mbC.On("PublishRequest", "event.cloud.hlr.activesubscriber.create", mock.Anything).Return(nil).Once()
+		asrRepo.On("Add", asr).Return(nil).Once()
+		mbC.On("PublishRequest", "event.cloud.asr.activesubscriber.create", mock.Anything).Return(nil).Once()
 
-		s, err := NewHlrRecordServer(hlrRepo, gutiRepo, factory, network, pcrf, Org, mbC)
+		s, err := NewAsrRecordServer(asrRepo, gutiRepo, factory, network, pcrf, Org, mbC)
 		assert.NoError(t, err)
 
 		hs, err := s.Activate(context.TODO(), &reqPb)
@@ -220,14 +220,14 @@ func TestHlr_Activate(t *testing.T) {
 
 		assert.NotNil(t, hs)
 
-		hlrRepo.AssertExpectations(t)
+		asrRepo.AssertExpectations(t)
 		gutiRepo.AssertExpectations(t)
 		assert.NoError(t, err)
 	})
 }
 
-func TestHlr_Inactivate(t *testing.T) {
-	hlrRepo := &mocks.HlrRecordRepo{}
+func TestAsr_Inactivate(t *testing.T) {
+	asrRepo := &mocks.AsrRecordRepo{}
 	gutiRepo := &mocks.GutiRepo{}
 	factory := &mocks.Factory{}
 	pcrf := &mocks.PolicyControl{}
@@ -242,12 +242,12 @@ func TestHlr_Inactivate(t *testing.T) {
 			},
 		}
 
-		hlrRepo.On("GetByIccid", reqPb.GetIccid()).Return(&sub, nil).Once()
+		asrRepo.On("GetByIccid", reqPb.GetIccid()).Return(&sub, nil).Once()
 		pcrf.On("DeleteSim", sub.Imsi).Return(nil).Once()
-		hlrRepo.On("Delete", sub.Imsi).Return(nil).Once()
-		mbC.On("PublishRequest", "event.cloud.hlr.activesubscriber.delete", mock.Anything).Return(nil).Once()
+		asrRepo.On("Delete", sub.Imsi).Return(nil).Once()
+		mbC.On("PublishRequest", "event.cloud.asr.activesubscriber.delete", mock.Anything).Return(nil).Once()
 
-		s, err := NewHlrRecordServer(hlrRepo, gutiRepo, factory, network, pcrf, Org, mbC)
+		s, err := NewAsrRecordServer(asrRepo, gutiRepo, factory, network, pcrf, Org, mbC)
 		assert.NoError(t, err)
 
 		hs, err := s.Inactivate(context.TODO(), &reqPb)
@@ -255,7 +255,7 @@ func TestHlr_Inactivate(t *testing.T) {
 
 		assert.NotNil(t, hs)
 
-		hlrRepo.AssertExpectations(t)
+		asrRepo.AssertExpectations(t)
 		gutiRepo.AssertExpectations(t)
 		assert.NoError(t, err)
 	})
@@ -268,12 +268,12 @@ func TestHlr_Inactivate(t *testing.T) {
 			},
 		}
 
-		hlrRepo.On("GetByImsi", reqPb.GetImsi()).Return(&sub, nil).Once()
+		asrRepo.On("GetByImsi", reqPb.GetImsi()).Return(&sub, nil).Once()
 		pcrf.On("DeleteSim", sub.Imsi).Return(nil).Once()
-		hlrRepo.On("Delete", sub.Imsi).Return(nil).Once()
-		mbC.On("PublishRequest", "event.cloud.hlr.activesubscriber.delete", mock.Anything).Return(nil).Once()
+		asrRepo.On("Delete", sub.Imsi).Return(nil).Once()
+		mbC.On("PublishRequest", "event.cloud.asr.activesubscriber.delete", mock.Anything).Return(nil).Once()
 
-		s, err := NewHlrRecordServer(hlrRepo, gutiRepo, factory, network, pcrf, Org, mbC)
+		s, err := NewAsrRecordServer(asrRepo, gutiRepo, factory, network, pcrf, Org, mbC)
 		assert.NoError(t, err)
 
 		hs, err := s.Inactivate(context.TODO(), &reqPb)
@@ -281,14 +281,14 @@ func TestHlr_Inactivate(t *testing.T) {
 
 		assert.NotNil(t, hs)
 
-		hlrRepo.AssertExpectations(t)
+		asrRepo.AssertExpectations(t)
 		gutiRepo.AssertExpectations(t)
 		assert.NoError(t, err)
 	})
 }
 
-func TestHlr_UpdateGuti(t *testing.T) {
-	hlrRepo := &mocks.HlrRecordRepo{}
+func TestAsr_UpdateGuti(t *testing.T) {
+	asrRepo := &mocks.AsrRecordRepo{}
 	gutiRepo := &mocks.GutiRepo{}
 	factory := &mocks.Factory{}
 	pcrf := &mocks.PolicyControl{}
@@ -307,10 +307,10 @@ func TestHlr_UpdateGuti(t *testing.T) {
 			UpdatedAt: uint32(guti.DeviceUpdatedAt.Unix()),
 		}
 
-		hlrRepo.On("GetByImsi", reqPb.GetImsi()).Return(&sub, nil).Once()
+		asrRepo.On("GetByImsi", reqPb.GetImsi()).Return(&sub, nil).Once()
 		gutiRepo.On("Update", &guti).Return(nil).Once()
 
-		s, err := NewHlrRecordServer(hlrRepo, gutiRepo, factory, network, pcrf, Org, mbC)
+		s, err := NewAsrRecordServer(asrRepo, gutiRepo, factory, network, pcrf, Org, mbC)
 		assert.NoError(t, err)
 
 		hs, err := s.UpdateGuti(context.TODO(), &reqPb)
@@ -318,14 +318,14 @@ func TestHlr_UpdateGuti(t *testing.T) {
 
 		assert.NotNil(t, hs)
 
-		hlrRepo.AssertExpectations(t)
+		asrRepo.AssertExpectations(t)
 		gutiRepo.AssertExpectations(t)
 		assert.NoError(t, err)
 	})
 }
 
-func TestHlr_UpdateTai(t *testing.T) {
-	hlrRepo := &mocks.HlrRecordRepo{}
+func TestAsr_UpdateTai(t *testing.T) {
+	asrRepo := &mocks.AsrRecordRepo{}
 	gutiRepo := &mocks.GutiRepo{}
 	factory := &mocks.Factory{}
 	pcrf := &mocks.PolicyControl{}
@@ -341,10 +341,10 @@ func TestHlr_UpdateTai(t *testing.T) {
 			UpdatedAt: uint32(guti.DeviceUpdatedAt.Unix()),
 		}
 
-		hlrRepo.On("GetByImsi", reqPb.GetImsi()).Return(&sub, nil).Once()
-		hlrRepo.On("UpdateTai", sub.Imsi, tai).Return(nil).Once()
+		asrRepo.On("GetByImsi", reqPb.GetImsi()).Return(&sub, nil).Once()
+		asrRepo.On("UpdateTai", sub.Imsi, tai).Return(nil).Once()
 
-		s, err := NewHlrRecordServer(hlrRepo, gutiRepo, factory, network, pcrf, Org, mbC)
+		s, err := NewAsrRecordServer(asrRepo, gutiRepo, factory, network, pcrf, Org, mbC)
 		assert.NoError(t, err)
 
 		hs, err := s.UpdateTai(context.TODO(), &reqPb)
@@ -352,7 +352,7 @@ func TestHlr_UpdateTai(t *testing.T) {
 
 		assert.NotNil(t, hs)
 
-		hlrRepo.AssertExpectations(t)
+		asrRepo.AssertExpectations(t)
 		gutiRepo.AssertExpectations(t)
 		assert.NoError(t, err)
 	})

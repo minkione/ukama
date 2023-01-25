@@ -66,7 +66,7 @@ func init() {
 	logrus.Infof("%+v", tConfig)
 }
 
-func CreateHlrClient() (*grpc.ClientConn, pb.HlrRecordServiceClient, error) {
+func CreateHlrClient() (*grpc.ClientConn, pb.AsrRecordServiceClient, error) {
 	logrus.Infoln("Connecting to HLR ", tConfig.ServiceHost)
 	context, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
@@ -75,7 +75,7 @@ func CreateHlrClient() (*grpc.ClientConn, pb.HlrRecordServiceClient, error) {
 		return nil, nil, err
 	}
 
-	c := pb.NewHlrRecordServiceClient(conn)
+	c := pb.NewAsrRecordServiceClient(conn)
 	return conn, c, nil
 }
 func Test_FullFlow(t *testing.T) {

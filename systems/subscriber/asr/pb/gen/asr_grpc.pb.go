@@ -18,10 +18,10 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// HlrRecordServiceClient is the client API for HlrRecordService service.
+// AsrRecordServiceClient is the client API for AsrRecordService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type HlrRecordServiceClient interface {
+type AsrRecordServiceClient interface {
 	// Subscriber Agent
 	Activate(ctx context.Context, in *ActivateReq, opts ...grpc.CallOption) (*ActivateResp, error)
 	Inactivate(ctx context.Context, in *InactivateReq, opts ...grpc.CallOption) (*InactivateResp, error)
@@ -32,72 +32,72 @@ type HlrRecordServiceClient interface {
 	Read(ctx context.Context, in *ReadReq, opts ...grpc.CallOption) (*ReadResp, error)
 }
 
-type hlrRecordServiceClient struct {
+type asrRecordServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewHlrRecordServiceClient(cc grpc.ClientConnInterface) HlrRecordServiceClient {
-	return &hlrRecordServiceClient{cc}
+func NewAsrRecordServiceClient(cc grpc.ClientConnInterface) AsrRecordServiceClient {
+	return &asrRecordServiceClient{cc}
 }
 
-func (c *hlrRecordServiceClient) Activate(ctx context.Context, in *ActivateReq, opts ...grpc.CallOption) (*ActivateResp, error) {
+func (c *asrRecordServiceClient) Activate(ctx context.Context, in *ActivateReq, opts ...grpc.CallOption) (*ActivateResp, error) {
 	out := new(ActivateResp)
-	err := c.cc.Invoke(ctx, "/ukama.hss.v1.HlrRecordService/Activate", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ukama.subscriber.asr.v1.AsrRecordService/Activate", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *hlrRecordServiceClient) Inactivate(ctx context.Context, in *InactivateReq, opts ...grpc.CallOption) (*InactivateResp, error) {
+func (c *asrRecordServiceClient) Inactivate(ctx context.Context, in *InactivateReq, opts ...grpc.CallOption) (*InactivateResp, error) {
 	out := new(InactivateResp)
-	err := c.cc.Invoke(ctx, "/ukama.hss.v1.HlrRecordService/Inactivate", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ukama.subscriber.asr.v1.AsrRecordService/Inactivate", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *hlrRecordServiceClient) UpdatePackage(ctx context.Context, in *UpdatePackageReq, opts ...grpc.CallOption) (*UpdatePackageResp, error) {
+func (c *asrRecordServiceClient) UpdatePackage(ctx context.Context, in *UpdatePackageReq, opts ...grpc.CallOption) (*UpdatePackageResp, error) {
 	out := new(UpdatePackageResp)
-	err := c.cc.Invoke(ctx, "/ukama.hss.v1.HlrRecordService/UpdatePackage", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ukama.subscriber.asr.v1.AsrRecordService/UpdatePackage", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *hlrRecordServiceClient) UpdateGuti(ctx context.Context, in *UpdateGutiReq, opts ...grpc.CallOption) (*UpdateGutiResp, error) {
+func (c *asrRecordServiceClient) UpdateGuti(ctx context.Context, in *UpdateGutiReq, opts ...grpc.CallOption) (*UpdateGutiResp, error) {
 	out := new(UpdateGutiResp)
-	err := c.cc.Invoke(ctx, "/ukama.hss.v1.HlrRecordService/UpdateGuti", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ukama.subscriber.asr.v1.AsrRecordService/UpdateGuti", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *hlrRecordServiceClient) UpdateTai(ctx context.Context, in *UpdateTaiReq, opts ...grpc.CallOption) (*UpdateTaiResp, error) {
+func (c *asrRecordServiceClient) UpdateTai(ctx context.Context, in *UpdateTaiReq, opts ...grpc.CallOption) (*UpdateTaiResp, error) {
 	out := new(UpdateTaiResp)
-	err := c.cc.Invoke(ctx, "/ukama.hss.v1.HlrRecordService/UpdateTai", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ukama.subscriber.asr.v1.AsrRecordService/UpdateTai", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *hlrRecordServiceClient) Read(ctx context.Context, in *ReadReq, opts ...grpc.CallOption) (*ReadResp, error) {
+func (c *asrRecordServiceClient) Read(ctx context.Context, in *ReadReq, opts ...grpc.CallOption) (*ReadResp, error) {
 	out := new(ReadResp)
-	err := c.cc.Invoke(ctx, "/ukama.hss.v1.HlrRecordService/Read", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ukama.subscriber.asr.v1.AsrRecordService/Read", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// HlrRecordServiceServer is the server API for HlrRecordService service.
-// All implementations must embed UnimplementedHlrRecordServiceServer
+// AsrRecordServiceServer is the server API for AsrRecordService service.
+// All implementations must embed UnimplementedAsrRecordServiceServer
 // for forward compatibility
-type HlrRecordServiceServer interface {
+type AsrRecordServiceServer interface {
 	// Subscriber Agent
 	Activate(context.Context, *ActivateReq) (*ActivateResp, error)
 	Inactivate(context.Context, *InactivateReq) (*InactivateResp, error)
@@ -106,182 +106,182 @@ type HlrRecordServiceServer interface {
 	UpdateGuti(context.Context, *UpdateGutiReq) (*UpdateGutiResp, error)
 	UpdateTai(context.Context, *UpdateTaiReq) (*UpdateTaiResp, error)
 	Read(context.Context, *ReadReq) (*ReadResp, error)
-	mustEmbedUnimplementedHlrRecordServiceServer()
+	mustEmbedUnimplementedAsrRecordServiceServer()
 }
 
-// UnimplementedHlrRecordServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedHlrRecordServiceServer struct {
+// UnimplementedAsrRecordServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedAsrRecordServiceServer struct {
 }
 
-func (UnimplementedHlrRecordServiceServer) Activate(context.Context, *ActivateReq) (*ActivateResp, error) {
+func (UnimplementedAsrRecordServiceServer) Activate(context.Context, *ActivateReq) (*ActivateResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Activate not implemented")
 }
-func (UnimplementedHlrRecordServiceServer) Inactivate(context.Context, *InactivateReq) (*InactivateResp, error) {
+func (UnimplementedAsrRecordServiceServer) Inactivate(context.Context, *InactivateReq) (*InactivateResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Inactivate not implemented")
 }
-func (UnimplementedHlrRecordServiceServer) UpdatePackage(context.Context, *UpdatePackageReq) (*UpdatePackageResp, error) {
+func (UnimplementedAsrRecordServiceServer) UpdatePackage(context.Context, *UpdatePackageReq) (*UpdatePackageResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdatePackage not implemented")
 }
-func (UnimplementedHlrRecordServiceServer) UpdateGuti(context.Context, *UpdateGutiReq) (*UpdateGutiResp, error) {
+func (UnimplementedAsrRecordServiceServer) UpdateGuti(context.Context, *UpdateGutiReq) (*UpdateGutiResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateGuti not implemented")
 }
-func (UnimplementedHlrRecordServiceServer) UpdateTai(context.Context, *UpdateTaiReq) (*UpdateTaiResp, error) {
+func (UnimplementedAsrRecordServiceServer) UpdateTai(context.Context, *UpdateTaiReq) (*UpdateTaiResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateTai not implemented")
 }
-func (UnimplementedHlrRecordServiceServer) Read(context.Context, *ReadReq) (*ReadResp, error) {
+func (UnimplementedAsrRecordServiceServer) Read(context.Context, *ReadReq) (*ReadResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Read not implemented")
 }
-func (UnimplementedHlrRecordServiceServer) mustEmbedUnimplementedHlrRecordServiceServer() {}
+func (UnimplementedAsrRecordServiceServer) mustEmbedUnimplementedAsrRecordServiceServer() {}
 
-// UnsafeHlrRecordServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to HlrRecordServiceServer will
+// UnsafeAsrRecordServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to AsrRecordServiceServer will
 // result in compilation errors.
-type UnsafeHlrRecordServiceServer interface {
-	mustEmbedUnimplementedHlrRecordServiceServer()
+type UnsafeAsrRecordServiceServer interface {
+	mustEmbedUnimplementedAsrRecordServiceServer()
 }
 
-func RegisterHlrRecordServiceServer(s grpc.ServiceRegistrar, srv HlrRecordServiceServer) {
-	s.RegisterService(&HlrRecordService_ServiceDesc, srv)
+func RegisterAsrRecordServiceServer(s grpc.ServiceRegistrar, srv AsrRecordServiceServer) {
+	s.RegisterService(&AsrRecordService_ServiceDesc, srv)
 }
 
-func _HlrRecordService_Activate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _AsrRecordService_Activate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ActivateReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(HlrRecordServiceServer).Activate(ctx, in)
+		return srv.(AsrRecordServiceServer).Activate(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ukama.hss.v1.HlrRecordService/Activate",
+		FullMethod: "/ukama.subscriber.asr.v1.AsrRecordService/Activate",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(HlrRecordServiceServer).Activate(ctx, req.(*ActivateReq))
+		return srv.(AsrRecordServiceServer).Activate(ctx, req.(*ActivateReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _HlrRecordService_Inactivate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _AsrRecordService_Inactivate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(InactivateReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(HlrRecordServiceServer).Inactivate(ctx, in)
+		return srv.(AsrRecordServiceServer).Inactivate(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ukama.hss.v1.HlrRecordService/Inactivate",
+		FullMethod: "/ukama.subscriber.asr.v1.AsrRecordService/Inactivate",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(HlrRecordServiceServer).Inactivate(ctx, req.(*InactivateReq))
+		return srv.(AsrRecordServiceServer).Inactivate(ctx, req.(*InactivateReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _HlrRecordService_UpdatePackage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _AsrRecordService_UpdatePackage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdatePackageReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(HlrRecordServiceServer).UpdatePackage(ctx, in)
+		return srv.(AsrRecordServiceServer).UpdatePackage(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ukama.hss.v1.HlrRecordService/UpdatePackage",
+		FullMethod: "/ukama.subscriber.asr.v1.AsrRecordService/UpdatePackage",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(HlrRecordServiceServer).UpdatePackage(ctx, req.(*UpdatePackageReq))
+		return srv.(AsrRecordServiceServer).UpdatePackage(ctx, req.(*UpdatePackageReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _HlrRecordService_UpdateGuti_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _AsrRecordService_UpdateGuti_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateGutiReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(HlrRecordServiceServer).UpdateGuti(ctx, in)
+		return srv.(AsrRecordServiceServer).UpdateGuti(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ukama.hss.v1.HlrRecordService/UpdateGuti",
+		FullMethod: "/ukama.subscriber.asr.v1.AsrRecordService/UpdateGuti",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(HlrRecordServiceServer).UpdateGuti(ctx, req.(*UpdateGutiReq))
+		return srv.(AsrRecordServiceServer).UpdateGuti(ctx, req.(*UpdateGutiReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _HlrRecordService_UpdateTai_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _AsrRecordService_UpdateTai_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateTaiReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(HlrRecordServiceServer).UpdateTai(ctx, in)
+		return srv.(AsrRecordServiceServer).UpdateTai(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ukama.hss.v1.HlrRecordService/UpdateTai",
+		FullMethod: "/ukama.subscriber.asr.v1.AsrRecordService/UpdateTai",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(HlrRecordServiceServer).UpdateTai(ctx, req.(*UpdateTaiReq))
+		return srv.(AsrRecordServiceServer).UpdateTai(ctx, req.(*UpdateTaiReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _HlrRecordService_Read_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _AsrRecordService_Read_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ReadReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(HlrRecordServiceServer).Read(ctx, in)
+		return srv.(AsrRecordServiceServer).Read(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ukama.hss.v1.HlrRecordService/Read",
+		FullMethod: "/ukama.subscriber.asr.v1.AsrRecordService/Read",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(HlrRecordServiceServer).Read(ctx, req.(*ReadReq))
+		return srv.(AsrRecordServiceServer).Read(ctx, req.(*ReadReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// HlrRecordService_ServiceDesc is the grpc.ServiceDesc for HlrRecordService service.
+// AsrRecordService_ServiceDesc is the grpc.ServiceDesc for AsrRecordService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var HlrRecordService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "ukama.hss.v1.HlrRecordService",
-	HandlerType: (*HlrRecordServiceServer)(nil),
+var AsrRecordService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "ukama.subscriber.asr.v1.AsrRecordService",
+	HandlerType: (*AsrRecordServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "Activate",
-			Handler:    _HlrRecordService_Activate_Handler,
+			Handler:    _AsrRecordService_Activate_Handler,
 		},
 		{
 			MethodName: "Inactivate",
-			Handler:    _HlrRecordService_Inactivate_Handler,
+			Handler:    _AsrRecordService_Inactivate_Handler,
 		},
 		{
 			MethodName: "UpdatePackage",
-			Handler:    _HlrRecordService_UpdatePackage_Handler,
+			Handler:    _AsrRecordService_UpdatePackage_Handler,
 		},
 		{
 			MethodName: "UpdateGuti",
-			Handler:    _HlrRecordService_UpdateGuti_Handler,
+			Handler:    _AsrRecordService_UpdateGuti_Handler,
 		},
 		{
 			MethodName: "UpdateTai",
-			Handler:    _HlrRecordService_UpdateTai_Handler,
+			Handler:    _AsrRecordService_UpdateTai_Handler,
 		},
 		{
 			MethodName: "Read",
-			Handler:    _HlrRecordService_Read_Handler,
+			Handler:    _AsrRecordService_Read_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

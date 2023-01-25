@@ -1,6 +1,6 @@
 package pkg
 
-const ServiceName = "hlr"
+const ServiceName = "asr"
 const SystemName = "subscriber"
 
 var IsDebugMode bool = true

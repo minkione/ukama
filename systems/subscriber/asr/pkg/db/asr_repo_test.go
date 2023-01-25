@@ -18,7 +18,7 @@ import (
 
 var Iccid = "0123456789012345678912"
 
-var sub = int_db.Hlr{
+var sub = int_db.Asr{
 	Iccid:          Iccid,
 	Imsi:           Imsi,
 	Op:             []byte("0123456789012345"),
@@ -54,7 +54,7 @@ var tai = int_db.Tai{
 	DeviceUpdatedAt: time.Now(),
 }
 
-func TestHlrRecordRepo_Add(t *testing.T) {
+func TestAsrRecordRepo_Add(t *testing.T) {
 
 	t.Run("Add", func(t *testing.T) {
 		// Arrange
@@ -83,7 +83,7 @@ func TestHlrRecordRepo_Add(t *testing.T) {
 		gdb, err := gorm.Open(dialector, &gorm.Config{})
 		assert.NoError(t, err)
 
-		r := int_db.NewHlrRecordRepo(&UkamaDbMock{
+		r := int_db.NewAsrRecordRepo(&UkamaDbMock{
 			GormDb: gdb,
 		})
 
@@ -102,7 +102,7 @@ func TestHlrRecordRepo_Add(t *testing.T) {
 
 }
 
-func TestHlrRecordRepo_Update(t *testing.T) {
+func TestAsrRecordRepo_Update(t *testing.T) {
 
 	t.Run("UpdatePackage", func(t *testing.T) {
 		// Arrange
@@ -128,7 +128,7 @@ func TestHlrRecordRepo_Update(t *testing.T) {
 		gdb, err := gorm.Open(dialector, &gorm.Config{})
 		assert.NoError(t, err)
 
-		r := int_db.NewHlrRecordRepo(&UkamaDbMock{
+		r := int_db.NewAsrRecordRepo(&UkamaDbMock{
 			GormDb: gdb,
 		})
 
@@ -147,7 +147,7 @@ func TestHlrRecordRepo_Update(t *testing.T) {
 
 }
 
-func TestHlrRecordRepo_Get(t *testing.T) {
+func TestAsrRecordRepo_Get(t *testing.T) {
 
 	t.Run("ReadByID", func(t *testing.T) {
 		sub.ID = 1
@@ -161,9 +161,9 @@ func TestHlrRecordRepo_Get(t *testing.T) {
 		hrow := sqlmock.NewRows([]string{"ID", "iccid", "imsi", "op", "amf", "key", "algo_type", "ue_dl_ambr_bps", "ue_ul_ambr_bps", "sqn", "csg_id_prsent", "csg_id", "default_apn_name", "network_id", "package_id"}).
 			AddRow(sub.ID, sub.Iccid, sub.Imsi, sub.Op, sub.Amf, sub.Key, sub.AlgoType, sub.UeDlAmbrBps, sub.UeDlAmbrBps, sub.Sqn, sub.CsgIdPrsent, sub.CsgId, sub.DefaultApnName, sub.NetworkID, sub.PackageId)
 
-		trow := sqlmock.NewRows([]string{"hlr_id", "plmn_id", "tac", "device_updated_at"})
+		trow := sqlmock.NewRows([]string{"asr_id", "plmn_id", "tac", "device_updated_at"})
 
-		mock.ExpectQuery(`^SELECT.*hlrs.*`).
+		mock.ExpectQuery(`^SELECT.*asrs.*`).
 			WithArgs(sub.ID).
 			WillReturnRows(hrow)
 
@@ -180,14 +180,14 @@ func TestHlrRecordRepo_Get(t *testing.T) {
 		gdb, err := gorm.Open(dialector, &gorm.Config{})
 		assert.NoError(t, err)
 
-		r := int_db.NewHlrRecordRepo(&UkamaDbMock{
+		r := int_db.NewAsrRecordRepo(&UkamaDbMock{
 			GormDb: gdb,
 		})
 
 		assert.NoError(t, err)
 
 		// Act
-		hlr, err := r.Get(int(sub.ID))
+		asr, err := r.Get(int(sub.ID))
 
 		// Assert
 		assert.NoError(t, err)
@@ -195,8 +195,8 @@ func TestHlrRecordRepo_Get(t *testing.T) {
 		err = mock.ExpectationsWereMet()
 		assert.NoError(t, err)
 
-		if assert.NotNil(t, hlr) {
-			assert.EqualValues(t, hlr.ID, sub.ID)
+		if assert.NotNil(t, asr) {
+			assert.EqualValues(t, asr.ID, sub.ID)
 		}
 
 	})
@@ -212,7 +212,7 @@ func TestHlrRecordRepo_Get(t *testing.T) {
 		hrow := sqlmock.NewRows([]string{"iccid", "imsi", "op", "amf", "key", "algo_type", "ue_dl_ambr_bps", "ue_ul_ambr_bps", "sqn", "csg_id_prsent", "csg_id", "default_apn_name", "network_id", "package_id"}).
 			AddRow(sub.Iccid, sub.Imsi, sub.Op, sub.Amf, sub.Key, sub.AlgoType, sub.UeDlAmbrBps, sub.UeDlAmbrBps, sub.Sqn, sub.CsgIdPrsent, sub.CsgId, sub.DefaultApnName, sub.NetworkID, sub.PackageId)
 
-		mock.ExpectQuery(`^SELECT.*hlrs.*`).
+		mock.ExpectQuery(`^SELECT.*asrs.*`).
 			WithArgs(Iccid).
 			WillReturnRows(hrow)
 
@@ -225,14 +225,14 @@ func TestHlrRecordRepo_Get(t *testing.T) {
 		gdb, err := gorm.Open(dialector, &gorm.Config{})
 		assert.NoError(t, err)
 
-		r := int_db.NewHlrRecordRepo(&UkamaDbMock{
+		r := int_db.NewAsrRecordRepo(&UkamaDbMock{
 			GormDb: gdb,
 		})
 
 		assert.NoError(t, err)
 
 		// Act
-		hlr, err := r.GetByIccid(Iccid)
+		asr, err := r.GetByIccid(Iccid)
 
 		// Assert
 		assert.NoError(t, err)
@@ -240,8 +240,8 @@ func TestHlrRecordRepo_Get(t *testing.T) {
 		err = mock.ExpectationsWereMet()
 		assert.NoError(t, err)
 
-		if assert.NotNil(t, hlr) {
-			assert.EqualValues(t, hlr.Iccid, Iccid)
+		if assert.NotNil(t, asr) {
+			assert.EqualValues(t, asr.Iccid, Iccid)
 		}
 
 	})
@@ -257,7 +257,7 @@ func TestHlrRecordRepo_Get(t *testing.T) {
 		hrow := sqlmock.NewRows([]string{"iccid", "imsi", "op", "amf", "key", "algo_type", "ue_dl_ambr_bps", "ue_ul_ambr_bps", "sqn", "csg_id_prsent", "csg_id", "default_apn_name", "network_id", "package_id"}).
 			AddRow(sub.Iccid, sub.Imsi, sub.Op, sub.Amf, sub.Key, sub.AlgoType, sub.UeDlAmbrBps, sub.UeDlAmbrBps, sub.Sqn, sub.CsgIdPrsent, sub.CsgId, sub.DefaultApnName, sub.NetworkID, sub.PackageId)
 
-		mock.ExpectQuery(`^SELECT.*hlrs.*`).
+		mock.ExpectQuery(`^SELECT.*asrs.*`).
 			WithArgs(Imsi).
 			WillReturnRows(hrow)
 
@@ -270,14 +270,14 @@ func TestHlrRecordRepo_Get(t *testing.T) {
 		gdb, err := gorm.Open(dialector, &gorm.Config{})
 		assert.NoError(t, err)
 
-		r := int_db.NewHlrRecordRepo(&UkamaDbMock{
+		r := int_db.NewAsrRecordRepo(&UkamaDbMock{
 			GormDb: gdb,
 		})
 
 		assert.NoError(t, err)
 
 		// Act
-		hlr, err := r.GetByImsi(Imsi)
+		asr, err := r.GetByImsi(Imsi)
 
 		// Assert
 		assert.NoError(t, err)
@@ -285,15 +285,15 @@ func TestHlrRecordRepo_Get(t *testing.T) {
 		err = mock.ExpectationsWereMet()
 		assert.NoError(t, err)
 
-		if assert.NotNil(t, hlr) {
-			assert.EqualValues(t, hlr.Imsi, Imsi)
+		if assert.NotNil(t, asr) {
+			assert.EqualValues(t, asr.Imsi, Imsi)
 		}
 
 	})
 
 }
 
-func TestHlrRecordRepo_Delete(t *testing.T) {
+func TestAsrRecordRepo_Delete(t *testing.T) {
 
 	t.Run("DeleteByICCID", func(t *testing.T) {
 		// Arrange
@@ -318,7 +318,7 @@ func TestHlrRecordRepo_Delete(t *testing.T) {
 		gdb, err := gorm.Open(dialector, &gorm.Config{})
 		assert.NoError(t, err)
 
-		r := int_db.NewHlrRecordRepo(&UkamaDbMock{
+		r := int_db.NewAsrRecordRepo(&UkamaDbMock{
 			GormDb: gdb,
 		})
 
@@ -358,7 +358,7 @@ func TestHlrRecordRepo_Delete(t *testing.T) {
 		gdb, err := gorm.Open(dialector, &gorm.Config{})
 		assert.NoError(t, err)
 
-		r := int_db.NewHlrRecordRepo(&UkamaDbMock{
+		r := int_db.NewAsrRecordRepo(&UkamaDbMock{
 			GormDb: gdb,
 		})
 
@@ -377,7 +377,7 @@ func TestHlrRecordRepo_Delete(t *testing.T) {
 
 }
 
-func TestHlrRecordRepo_UpdateTai(t *testing.T) {
+func TestAsrRecordRepo_UpdateTai(t *testing.T) {
 	t.Run("UpdateTai", func(t *testing.T) {
 
 		sub.ID = 1
@@ -392,10 +392,10 @@ func TestHlrRecordRepo_UpdateTai(t *testing.T) {
 		hrow := sqlmock.NewRows([]string{"ID", "iccid", "imsi", "op", "amf", "key", "algo_type", "ue_dl_ambr_bps", "ue_ul_ambr_bps", "sqn", "csg_id_prsent", "csg_id", "default_apn_name", "network_id", "package_id"}).
 			AddRow(sub.ID, sub.Iccid, sub.Imsi, sub.Op, sub.Amf, sub.Key, sub.AlgoType, sub.UeDlAmbrBps, sub.UeDlAmbrBps, sub.Sqn, sub.CsgIdPrsent, sub.CsgId, sub.DefaultApnName, sub.NetworkID, sub.PackageId)
 
-		trow := sqlmock.NewRows([]string{"hlr_id", "plmn_id", "tac", "device_updated_at"})
+		trow := sqlmock.NewRows([]string{"asr_id", "plmn_id", "tac", "device_updated_at"})
 
 		mock.ExpectBegin()
-		mock.ExpectQuery(`^SELECT.*hlrs.*`).
+		mock.ExpectQuery(`^SELECT.*asrs.*`).
 			WithArgs(Imsi).
 			WillReturnRows(hrow)
 
@@ -422,7 +422,7 @@ func TestHlrRecordRepo_UpdateTai(t *testing.T) {
 		gdb, err := gorm.Open(dialector, &gorm.Config{})
 		assert.NoError(t, err)
 
-		r := int_db.NewHlrRecordRepo(&UkamaDbMock{
+		r := int_db.NewAsrRecordRepo(&UkamaDbMock{
 			GormDb: gdb,
 		})
 
