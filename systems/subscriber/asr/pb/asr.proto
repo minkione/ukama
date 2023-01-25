@@ -1,0 +1,117 @@
+syntax = "proto3";
+
+option go_package = "pb/gen";
+
+package ukama.hss.v1;
+
+import "google/api/annotations.proto";
+import "validator.proto";
+
+service HlrRecordService {
+
+    //rpc Update(UpdateRecordReq) returns (UpdateRecordResp);
+
+    /* Subscriber Agent */ 
+    rpc Activate(ActivateReq) returns (ActivateResp);
+    rpc Inactivate(InactivateReq) returns (InactivateResp);
+    rpc UpdatePackage(UpdatePackageReq) returns (UpdatePackageResp); 
+   
+    
+    /* Node Gateway */
+    rpc UpdateGuti (UpdateGutiReq) returns (UpdateGutiResp);
+    rpc UpdateTai (UpdateTaiReq) returns (UpdateTaiResp);
+
+    rpc Read(ReadReq) returns (ReadResp);
+}
+
+
+message Record {
+    string Imsi = 1 [(validator.field) = { string_not_empty: true,  length_gt: 5, length_lt: 16 }, json_name="imsi"];
+    string SimId = 2 [(validator.field) = {uuid_ver: 0, string_not_empty: true}, json_name="simId"];
+    string Iccid = 3 [(validator.field) = {string_not_empty: true,  length_gt: 5, length_lt: 16}, json_name="iccid"];
+    bytes Key = 4[json_name="k"];
+    bytes Op = 5[json_name="op"];
+    bytes Amf = 6[json_name="amf"];
+    Apn Apn = 7 [json_name="apn"];
+    uint32 AlgoType = 8 [json_name="algo_type"];
+    uint32 UeDlAmbrBps = 9 [json_name="ue_dl_ambr_bps"];
+    uint32 UeUlAmbrBps = 10 [json_name="ue_ul_ambr_bps"];
+    uint64 Sqn  = 11 [json_name="sqn"];
+    bool CsgIdPrsent = 12 [json_name="csg_id_prsent"];
+    uint32 CsgId = 13 [json_name="csg_id"];
+    string PackageId = 14 [json_name="package_id"];
+}
+
+message Apn {
+    string Name = 1;
+}
+
+message ReadReq {
+    oneof id {
+        string Imsi = 1 [(validator.field) = { string_not_empty: true,  length_gt: 5, length_lt: 16}];
+        string Iccid = 2 [(validator.field) = {string_not_empty: true, length_gt: 18, length_lt: 22}];
+    }
+}
+
+message ReadResp {
+    Record Record = 1;
+}
+message ActivateReq {
+    string network = 1[(validator.field) = {uuid_ver: 0, string_not_empty: true}, json_name="network"];
+    string Iccid = 2 [(validator.field) = { string_not_empty: true,  length_gt: 18, length_lt: 22}, json_name="iccid"];
+    string PackageId = 3;
+}
+
+message ActivateResp {
+    
+}
+
+/* Could be called by subscriber manager with ICCID and by billing service with imsi */ 
+message InactivateReq {
+    oneof id {
+        string Imsi = 1 [(validator.field) = { string_not_empty: true,  length_gt: 5, length_lt: 16}];
+        string Iccid = 2 [(validator.field) = {string_not_empty: true, length_gt: 18, length_lt: 22}];
+    }
+}
+
+message InactivateResp {
+    
+}
+
+message UpdatePackageReq {
+     // Mesh will add this info based on connection.
+    string Iccid = 1 [(validator.field) = { string_not_empty: true,  length_gt: 18, length_lt: 22}, json_name="iccid"];
+    string PackageId = 2[(validator.field) = {uuid_ver: 0, string_not_empty: true}, json_name="packageId"]; // Mesh will add this info based on connection.
+}
+
+message UpdatePackageResp {
+
+}
+
+message UpdateGutiReq{
+    string Imsi = 1 [(validator.field) = { string_not_empty: true,  length_gt: 5, length_lt: 16}];
+    Guti Guti = 2 [(validator.field) = { msg_exists: true }];
+    uint32 UpdatedAt = 4 [json_name="updated_at",(validator.field) = { int_gt: 1639144053}]; // unix timestamp
+}
+
+message Guti{
+    string PlmnId = 1 [json_name="plmn_id", (validator.field) = { string_not_empty: true,  length_gt: 4, length_lt: 7}];
+    uint32 Mmegi  = 2;
+    uint32  Mmec = 3;
+    uint32  Mtmsi = 4;
+}
+
+message UpdateGutiResp{
+
+}
+
+message UpdateTaiReq{
+    string Imsi = 1;
+    string PlmnId = 2 [json_name="plmn_id", (validator.field) = { string_not_empty: true,  length_gt: 4, length_lt: 7}];
+    uint32 Tac = 3 [(validator.field) = { string_not_empty: true, length_lt: 65537}]; // 16 bit max
+    uint32 UpdatedAt = 4 [json_name="updated_at", (validator.field) = { int_gt: 1639144053} ]; // unix timestamp
+}
+
+message UpdateTaiResp{
+
+}
