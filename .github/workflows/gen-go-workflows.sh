@@ -21,7 +21,7 @@ generate(){
          | sed "s#{{SANITIZED_NAME}}#${SANITIZED}#g" | sed "s#{{WORKFLOW_PATH}}#${WORKFLOW_PATH}#g" | sed "s#{{SYSTEM_NAME}}#${SYSTEM_NAME}#g" )
 
         PR_RELEASE=$(echo "${PR_RELEASE_TEMPLATE}" | sed "s#{{SERVICE}}#${1}/${SERVICE}#g" | sed "s#{{SERVICE_NAME}}#${SERVICE}#g" | sed "s#{{HELMFILE_PREFIX}}#${2}#g" \
-         | sed "s#{{SANITIZED_NAME}}#${SANITIZED}#g" | sed "s#{{WORKFLOW_PATH}}#${WORKFLOW_PATH}#g" )
+         | sed "s#{{SANITIZED_NAME}}#${SANITIZED}#g" | sed "s#{{WORKFLOW_PATH}}#${WORKFLOW_PATH}#g" | sed "s#{{SYSTEM_NAME}}#${SYSTEM_NAME}#g" )
         
         # save workflow to .github/workflows/{ROUTE}
         echo "${WARNING}${WORKFLOW}" > ${WORKFLOW_PATH}.yaml
