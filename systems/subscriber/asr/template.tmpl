@@ -38,14 +38,14 @@
 
 #DIR_CONTENT#
 
-- **cmd**: Contains the server and system/sub-system version. Purpose of this file is to initialize the DB and start server. We use `make server` command to run this file.
+- **cmd**: Contains the server and system/sub-system version. Purpose of this file is to initialize the DB and start server. We use `make` command to build this service.
 - **mocks**: This directory contains the auto generated file which get generated based on `*.proto`. It contains functions which we can use to write test cases.
 - **pb**: This directory contains the `*.proto` file. In proto file we define service with all the rpc's and messages.
-- **internal/db**: DB directory under pkg contains 2 files.
+- **pkg/db**: DB directory under pkg contains 2 files.
   `model.go` file contains the db model structure/s.
   `*_repo.go` is reponsible of communicating with db using [gorm](https://gorm.io/docs/).
-- **internal/queue** This dir contains the logic of Queue's. like: Listner queue, Publisher queue.
-- **internal/server** This dir contains the logic of RPC handlers.
+- **pkg/client** This dir contains the REST client interfaces to other system like factory, PCRF and Network. 
+- **pkg/server** This dir contains the logic of RPC handlers.
 
 <a name="#how-to"></a>
 
