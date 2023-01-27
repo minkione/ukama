@@ -3,7 +3,7 @@
 
 ## Table of Contents
 
- - [AsrRecordService](#ukama.subscriber.asr.v1.AsrRecordService)
+ - [ASR](#ukama.subscriber.asr.v1.AsrRecordService)
 - [Directory structure](#directory-structure)
 - [How to use?](#how-to)
  - [asr.proto](#asr.proto)
