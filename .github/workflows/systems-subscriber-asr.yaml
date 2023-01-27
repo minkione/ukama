@@ -1,12 +1,13 @@
 # THIS FILE IS GENERATED AUTOMATICALLY BY RUNNING gen-workflow.sh 
 # DON'T CHANGE IT MANUALLY TO AVOID YOUR CHANGES BEING OVERWRITTEN
 # USE workflow-template.yaml FOR MAKING CHANGES IN WORKFLOWS
-name: build-subscriber-asr
+name: build-systems-subscriber-asr
 on:  
   push:   
     paths:
         - "systems/subscriber/asr/**"
         - ".github/workflows/systems-subscriber-asr.yaml"
+        - ".github/actions/**"
  
   workflow_dispatch:
 
