@@ -28,7 +28,12 @@ runs:
       key: ${{ runner.os }}-go-ukama
       restore-keys: |
         ${{ runner.os }}-go-
-
+  
+  - name: Download code coverage results
+    uses: actions/upload-artifact@v3
+    with:
+      name: code-coverage-${{ github.run_number }}
+      
   - name: SonarCloud Scan
     uses: sonarsource/sonarcloud-github-action@v1.6
     env:
@@ -40,7 +45,7 @@ runs:
         -Dsonar.organization=ukama
         -Dsonar.projectKey=${{ inputs.project-key }}
         -Dsonar.projectName=${{ inputs.working-directory }}
-        -Dsonar.go.coverage.reportPaths=coverage.out
+        -Dsonar.go.coverage.reportPaths=code-coverage-${{ github.run_number }}.out
         -Dsonar.test.exclusions=tests/**
         -Dsonar.tests=tests/
         -Dsonar.verbose=false
