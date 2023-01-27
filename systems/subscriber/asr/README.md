@@ -33,8 +33,7 @@
 
 <a name="ukama.subscriber.asr.v1.AsrRecordService"></a>
 
-# AsrRecordService
-ASR aka Active Subscriber Registry
+# ASR aka Active Subscriber Registry
 ASR maintains the record of all the active subscribers of a organization. All the network with in the organization share same ASR.
 Subscriber is added to ASr as soon as its activated and removed from ASR as soon as its deactivated.
 
