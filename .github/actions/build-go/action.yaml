@@ -60,17 +60,7 @@ runs:
     shell: bash
     run: go test -v ./... -coverprofile="coverage.out"
     working-directory: ${{ inputs.working-directory }}
-    
-  - name: list
-    shell: bash
-    run: ls .
-    working-directory: ${{ inputs.working-directory }}
-    
-  - name: content
-    shell: bash
-    run: cat coverage.out
-    working-directory: ${{ inputs.working-directory }} 
-    
+        
   - name: Archive code coverage results
     uses: actions/upload-artifact@v3
     with:
