@@ -35,10 +35,12 @@ runs:
       name: code-coverage-${{ github.run_number }}
  
  - name: list
+    shell: bash
     run: ls .
     working-directory: ${{ inputs.working-directory }}
     
   - name: content
+    shell: bash
     run: cat coverage.out
     working-directory: ${{ inputs.working-directory }} 
     
