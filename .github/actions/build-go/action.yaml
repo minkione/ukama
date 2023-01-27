@@ -65,7 +65,7 @@ runs:
     uses: actions/upload-artifact@v3
     with:
       name: code-coverage-${{ github.run_number }}
-      path: code-coverage.out
+      path: coverage.out
 
   - name: Configure AWS credentials
     uses: aws-actions/configure-aws-credentials@v1
