@@ -33,6 +33,7 @@ runs:
     uses: actions/download-artifact@v3
     with:
       name: code-coverage-${{ github.run_number }}
+      path: ${{ inputs.working-directory }}
  
   - name: list
     shell: bash
