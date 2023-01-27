@@ -34,7 +34,7 @@ runs:
     with:
       name: code-coverage-${{ github.run_number }}
  
- -  name: list
+  - name: list
     shell: bash
     run: ls .
     working-directory: ${{ inputs.working-directory }}
