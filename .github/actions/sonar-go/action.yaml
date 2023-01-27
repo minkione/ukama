@@ -34,7 +34,7 @@ runs:
     with:
       name: code-coverage-${{ github.run_number }}
  
- - name: list
+ -  name: list
     shell: bash
     run: ls .
     working-directory: ${{ inputs.working-directory }}
@@ -55,7 +55,7 @@ runs:
         -Dsonar.organization=ukama
         -Dsonar.projectKey=${{ inputs.project-key }}
         -Dsonar.projectName=${{ inputs.working-directory }}
-        -Dsonar.go.coverage.reportPaths=code-coverage-${{ github.run_number }}.out
+        -Dsonar.go.coverage.reportPaths=code-coverage.out
         -Dsonar.test.exclusions=tests/**
         -Dsonar.tests=tests/
         -Dsonar.verbose=false
